@@ -24,6 +24,7 @@
 
 #include "esp_common.h"
 #include "user_config.h"
+#include "lwip/lwip/sockets.h"
 
 /******************************************************************************
  * FunctionName : user_rf_cal_sector_set
@@ -74,6 +75,59 @@ uint32 user_rf_cal_sector_set(void)
     return rf_cal_sec;
 }
 
+#define UDP_DATA_LEN 64
+void udp_process(void *p)
+{
+	LOCAL int32_t sock_fd;
+	struct sockaddr_in server_addr;
+	memset(&server_addr, 0, sizeof(struct sockaddr_in));
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_addr.s_addr = INADDR_ANY;
+	server_addr.sin_port = htons(UDP_LOCAL_PORT);
+	server_addr.sin_len = sizeof(server_addr);
+
+	do {
+		sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
+		if(sock_fd == -1) {
+			printf("ESP8266 UDP task > failed to create socket!\n");
+			vTaskDelay(1000/portTICK_RATE_MS);
+		}
+	} while(sock_fd == -1);
+	printf("ESP8266 UDP task > socket OK!\n");
+
+	int ret = 0;
+	do {
+		ret = bind(sock_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+		if(ret != 0) {
+			printf("ESP8266 UDP task > captdns_task failed to bind socket!\n");
+			vTaskDelay(1000/portTICK_RATE_MS);
+		}
+	} while(ret != 0);
+	printf("ESP8266 UDP task > bind OK!\n");
+
+	uint8_t *udp_msg = (uint8_t *)zalloc(UDP_DATA_LEN);
+	struct sockaddr_in from;
+	socklen_t fromlen = 0;
+	char nNetTimeout = 0;
+	while(1) {
+        memset(udp_msg, 0, UDP_DATA_LEN);
+        memset(&from, 0, sizeof(from));
+
+        setsockopt(sock_fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&nNetTimeout, sizeof(int));
+        fromlen = sizeof(struct sockaddr_in);
+        ret = recvfrom(sock_fd, (uint8_t *)udp_msg, UDP_DATA_LEN, 0, (struct sockaddr *)&from, (socklen_t *)&fromlen);
+        if(ret > 0) {
+        	printf("ESP8266 UDP task > recv %d Bytes from %s, Port %d\n", ret, inet_ntoa(from.sin_addr), ntohs(from.sin_port));
+        	sendto(sock_fd, (uint8_t *)udp_msg, ret, 0, (struct sockaddr *)&from, fromlen);
+        }
+	}
+	if(udp_msg) {
+		free(udp_msg);
+		udp_msg = NULL;
+	}
+	close(sock_fd);
+}
+
 /******************************************************************************
  * FunctionName : user_init
  * Description  : entry of user application, init user function here
@@ -82,7 +136,18 @@ uint32 user_rf_cal_sector_set(void)
 *******************************************************************************/
 void user_init(void)
 {
-    /* station mode */
-    wifi_set_opmode(STATIONAP_MODE);
-}
+    /* softAP mode */
+    wifi_set_opmode(SOFTAP_MODE);
 
+    struct softap_config *config = (struct softap_config *)zalloc(sizeof(struct softap_config)); //initialization.
+    wifi_softap_get_config(config);
+    sprintf(config->ssid, MY_AP_SSID);
+    sprintf(config->password, MY_AP_PASSWD);
+    config->authmode = AUTH_WPA_WPA2_PSK;
+    config->ssid_len = 0;
+    config->max_connection = 4;
+    wifi_softap_set_config(config);
+    free(config);
+
+    xTaskCreate(udp_process, "udp_process", 512, NULL, 2, NULL);
+}
