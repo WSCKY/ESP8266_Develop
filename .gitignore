@@ -3,3 +3,6 @@ Binary/
 *.a
 *.o
 .output/
+.cproject
+.project
+
