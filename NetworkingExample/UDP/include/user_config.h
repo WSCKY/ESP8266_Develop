@@ -28,5 +28,7 @@
 #define MY_AP_SSID       "kyChu_Wifi"
 #define MY_AP_PASSWD     "12345678"
 
+#define UDP_LOCAL_PORT   1200
+
 #endif
 
