@@ -135,6 +135,9 @@ DDEFINES +=				\
 INCLUDES := $(INCLUDES) -I $(PDIR)include
 sinclude $(SDK_PATH)/Makefile
 
-.PHONY: FORCE
+.PHONY: FORCE upload
 FORCE:
+
+upload: | $(BIN_PATH)
+	@esptool.py --port /dev/ttyUSB0 write_flash -ff 80m -fm dio -fs 4m 0x00000 $(BIN_PATH)/eagle.flash.bin 0x20000 $(BIN_PATH)/eagle.irom0text.bin
 
