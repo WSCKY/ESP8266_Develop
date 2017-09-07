@@ -76,56 +76,75 @@ uint32 user_rf_cal_sector_set(void)
 }
 
 #define UDP_DATA_LEN 64
-void udp_process(void *p)
+void tcp_process(void *p)
 {
-	LOCAL int32_t sock_fd;
-	struct sockaddr_in server_addr;
-	memset(&server_addr, 0, sizeof(struct sockaddr_in));
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_addr.s_addr = INADDR_ANY;
-	server_addr.sin_port = htons(UDP_LOCAL_PORT);
+	int32 listenfd;
+	int32 ret;
+	struct sockaddr_in server_addr, remote_addr;
+	int stack_countr = 0;
+	memset(&server_addr, 0, sizeof(struct sockaddr_in));  /* Zero out structure */
+	server_addr.sin_family = AF_INET;                     /* Internet address family */
+	server_addr.sin_addr.s_addr = INADDR_ANY;             /* Any incoming interface */
+	server_addr.sin_port = htons(SERVER_PORT);
 	server_addr.sin_len = sizeof(server_addr);
 
+	/* Create socket for incoming connections */
 	do {
-		sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
-		if(sock_fd == -1) {
-			printf("ESP8266 UDP task > failed to create socket!\n");
+		listenfd = socket(AF_INET, SOCK_STREAM, 0);
+		if(listenfd == -1) {
+			printf("ESP8266 TCP server task > socket error!\n");
 			vTaskDelay(1000/portTICK_RATE_MS);
 		}
-	} while(sock_fd == -1);
-	printf("ESP8266 UDP task > socket OK!\n");
+	} while(listenfd == -1);
+	printf("ESP8266 TCP server task > create socket: %d\n", listenfd);
 
-	int ret = 0;
+	/* Bind to the local port */
 	do {
-		ret = bind(sock_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+		ret = bind(listenfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
 		if(ret != 0) {
-			printf("ESP8266 UDP task > captdns_task failed to bind socket!\n");
+			printf("ESP8266 TCP server task > bind fail!\n");
 			vTaskDelay(1000/portTICK_RATE_MS);
 		}
 	} while(ret != 0);
-	printf("ESP8266 UDP task > bind OK!\n");
+	printf("ESP8266 TCP server task > port: %d\n", ntohs(server_addr.sin_port));
 
-	uint8_t *udp_msg = (uint8_t *)zalloc(UDP_DATA_LEN);
-	struct sockaddr_in from;
-	socklen_t fromlen = 0;
-	char nNetTimeout = 0;
-	while(1) {
-        memset(udp_msg, 0, UDP_DATA_LEN);
-        memset(&from, 0, sizeof(from));
+	/* Establish TCP server interception */
+	do {
+		/* Listen to the local connection */
+		ret = listen(listenfd, MAX_CONN);
+		if(ret != 0) {
+			printf("ESP8266 TCP server task > failed to set listen queue!\n");
+			vTaskDelay(1000/portTICK_RATE_MS);
+		}
+	} while(ret != 0);
+	printf("ESP8266 TCP server task > listener OK!\n");
 
-        setsockopt(sock_fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&nNetTimeout, sizeof(int));
-        fromlen = sizeof(struct sockaddr_in);
-        ret = recvfrom(sock_fd, (uint8_t *)udp_msg, UDP_DATA_LEN, 0, (struct sockaddr *)&from, (socklen_t *)&fromlen);
-        if(ret > 0) {
-        	printf("ESP8266 UDP task > recv %d Bytes from %s, Port %d\n", ret, inet_ntoa(from.sin_addr), ntohs(from.sin_port));
-        	sendto(sock_fd, (uint8_t *)udp_msg, ret, 0, (struct sockaddr *)&from, fromlen);
-        }
+	/* Wait until the TCP client is connected to the server;
+	 then start receiving data packets when the TCP communication is established */
+	int32 client_sock;
+	int32 len = sizeof(struct sockaddr_in);
+	int32 recbytes = 0;
+
+	for(;;) {
+		printf("ESP8266 TCP server task > wait client\n");
+		/* block here waiting remote connect request */
+		if((client_sock = accept(listenfd, (struct sockaddr *)&remote_addr, (socklen_t *)&len)) < 0) {
+			printf("ESP8266 TCP server task > accept fail\n");
+			continue;
+		}
+		printf("ESP8266 TCP server task > Client from %s %d\n",
+				inet_ntoa(remote_addr.sin_addr), htons(remote_addr.sin_port));
+		char *recv_buf = (char *)zalloc(128);
+		while((recbytes = read(client_sock, recv_buf, 128)) > 0) {
+			recv_buf[recbytes] = 0;
+			printf("ESP8266 TCP server task > read data success %d!\n"
+				   "ESP8266 TCP server task > %s\n", recbytes, recv_buf);
+		}
+		free(recv_buf);
+		if(recbytes <= 0) {
+			printf("ESP8266 TCP server task > read data fail\n");
+		}
 	}
-	if(udp_msg) {
-		free(udp_msg);
-		udp_msg = NULL;
-	}
-	close(sock_fd);
 }
 
 /******************************************************************************
@@ -145,9 +164,9 @@ void user_init(void)
     sprintf(config->password, MY_AP_PASSWD);
     config->authmode = AUTH_WPA_WPA2_PSK;
     config->ssid_len = 0;
-    config->max_connection = 4;
+    config->max_connection = MAX_CONN;
     wifi_softap_set_config(config);
     free(config);
 
-    xTaskCreate(udp_process, "udp_process", 512, NULL, 2, NULL);
+    xTaskCreate(tcp_process, "tcp_process", 512, NULL, 2, NULL);
 }

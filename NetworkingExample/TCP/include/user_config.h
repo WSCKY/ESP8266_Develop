@@ -25,10 +25,11 @@
 #ifndef __USER_CONFIG_H__
 #define __USER_CONFIG_H__
 
-#define MY_AP_SSID       "kyChu_Wifi"
+#define MY_AP_SSID       "kyChu_TCP"
 #define MY_AP_PASSWD     "12345678"
 
-#define UDP_LOCAL_PORT   1200
+#define MAX_CONN         4
+#define SERVER_PORT      1002
 
 #endif
 
