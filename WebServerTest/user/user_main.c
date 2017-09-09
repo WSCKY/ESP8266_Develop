@@ -156,8 +156,8 @@ uint32 user_rf_cal_sector_set(void)
 *******************************************************************************/
 void user_init(void)
 {
-    /* softAP mode */
-    wifi_set_opmode(SOFTAP_MODE);
+    /* WiFi station + soft-AP mode */
+    wifi_set_opmode(STATIONAP_MODE);
 
     struct softap_config *config = (struct softap_config *)zalloc(sizeof(struct softap_config)); //initialization.
     wifi_softap_get_config(config);
@@ -168,6 +168,12 @@ void user_init(void)
     config->max_connection = MAX_CONN;
     wifi_softap_set_config(config);
     free(config);
+
+    struct station_config *sconfig = (struct station_config *)zalloc(sizeof(struct station_config));
+    sprintf(sconfig->ssid, WIFI_SSID);
+    sprintf(sconfig->password, WIFI_PASSWD);
+    wifi_station_set_config(sconfig);
+    free(sconfig);
 
     http_server_netconn_init();
 //    xTaskCreate(tcp_process, "tcp_process", 512, NULL, 2, NULL);
