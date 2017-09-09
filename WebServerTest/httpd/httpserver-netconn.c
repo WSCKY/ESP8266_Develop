@@ -198,17 +198,17 @@ static void http_server_serve(struct netconn *conn)
       if ((buflen >=5) && (strncmp(buf, "GET /", 5) == 0))
       {
         /* Check if request to get ST.gif */ 
-        if (strncmp((char const *)buf,"GET /img/sics.gif", 29) == 0)
+        if (strncmp((char const *)buf,"GET /img/fluidicon.png", 29) == 0)
         {
-          /* Check if request to get ST logo.jpg */
-          fs_open(&file, "/img/sics.gif");
+          /* Check if request to get logo.jpg */
+          fs_open(&file, "/img/fluidicon.png");
           netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
           fs_close(&file);
           printf("11111\n");
         }
         else if((strncmp(buf, "GET /index.html", 19) == 0)||(strncmp(buf, "GET / ", 6) == 0))
         {
-          /* Load STM32F7xx page */
+          /* Load index page */
           fs_open(&file, "/index.html");
           netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
           fs_close(&file);
