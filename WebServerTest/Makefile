@@ -18,12 +18,12 @@ FLAVOR = debug
 #EXTRA_CCFLAGS += -u
 
 ifndef SDK_PATH
-SDK_PATH = $(shell pwd)/../../ESP8266_RTOS_SDK
+SDK_PATH = $(shell pwd)/../ESP8266_RTOS_SDK
 export SDK_PATH
 endif
 
 ifndef BIN_PATH
-BIN_PATH = $(shell pwd)/../../Binary
+BIN_PATH = $(shell pwd)/../Binary
 export BIN_PATH
 endif
 
