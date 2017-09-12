@@ -28,9 +28,6 @@
 #define MY_AP_SSID       "kyChu_WebServer"
 #define MY_AP_PASSWD     "12345678"
 
-#define WIFI_SSID        "XEO-DP"
-#define WIFI_PASSWD      "XpartNer6495"
-
 #define MAX_CONN         4
 #define WEB_SERVER_PORT  80
 
