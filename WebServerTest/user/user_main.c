@@ -24,8 +24,7 @@
 
 #include "esp_common.h"
 #include "user_config.h"
-#include "lwip/lwip/sockets.h"
-//#include "httpserver-netconn.h"
+#include "httpserver-netconn.h"
 
 /******************************************************************************
  * FunctionName : user_rf_cal_sector_set
@@ -76,78 +75,6 @@ uint32 user_rf_cal_sector_set(void)
     return rf_cal_sec;
 }
 
-//#define UDP_DATA_LEN 64
-//void tcp_process(void *p)
-//{
-//	int32 listenfd;
-//	int32 ret;
-//	struct sockaddr_in server_addr, remote_addr;
-//	int stack_countr = 0;
-//	memset(&server_addr, 0, sizeof(struct sockaddr_in));  /* Zero out structure */
-//	server_addr.sin_family = AF_INET;                     /* Internet address family */
-//	server_addr.sin_addr.s_addr = INADDR_ANY;             /* Any incoming interface */
-//	server_addr.sin_port = htons(WEB_SERVER_PORT);
-//	server_addr.sin_len = sizeof(server_addr);
-//
-//	/* Create socket for incoming connections */
-//	do {
-//		listenfd = socket(AF_INET, SOCK_STREAM, 0);
-//		if(listenfd == -1) {
-//			printf("ESP8266 TCP server task > socket error!\n");
-//			vTaskDelay(1000/portTICK_RATE_MS);
-//		}
-//	} while(listenfd == -1);
-//	printf("ESP8266 TCP server task > create socket: %d\n", listenfd);
-//
-//	/* Bind to the local port */
-//	do {
-//		ret = bind(listenfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
-//		if(ret != 0) {
-//			printf("ESP8266 TCP server task > bind fail!\n");
-//			vTaskDelay(1000/portTICK_RATE_MS);
-//		}
-//	} while(ret != 0);
-//	printf("ESP8266 TCP server task > port: %d\n", ntohs(server_addr.sin_port));
-//
-//	/* Establish TCP server interception */
-//	do {
-//		/* Listen to the local connection */
-//		ret = listen(listenfd, MAX_CONN);
-//		if(ret != 0) {
-//			printf("ESP8266 TCP server task > failed to set listen queue!\n");
-//			vTaskDelay(1000/portTICK_RATE_MS);
-//		}
-//	} while(ret != 0);
-//	printf("ESP8266 TCP server task > listener OK!\n");
-//
-//	/* Wait until the TCP client is connected to the server;
-//	 then start receiving data packets when the TCP communication is established */
-//	int32 client_sock;
-//	int32 len = sizeof(struct sockaddr_in);
-//	int32 recbytes = 0;
-//
-//	for(;;) {
-//		printf("ESP8266 TCP server task > wait client\n");
-//		/* block here waiting remote connect request */
-//		if((client_sock = accept(listenfd, (struct sockaddr *)&remote_addr, (socklen_t *)&len)) < 0) {
-//			printf("ESP8266 TCP server task > accept fail\n");
-//			continue;
-//		}
-//		printf("ESP8266 TCP server task > Client from %s %d\n",
-//				inet_ntoa(remote_addr.sin_addr), htons(remote_addr.sin_port));
-//		char *recv_buf = (char *)zalloc(128);
-//		while((recbytes = read(client_sock, recv_buf, 128)) > 0) {
-//			recv_buf[recbytes] = 0;
-//			printf("ESP8266 TCP server task > read data success %d!\n"
-//				   "ESP8266 TCP server task > %s\n", recbytes, recv_buf);
-//		}
-//		free(recv_buf);
-//		if(recbytes <= 0) {
-//			printf("ESP8266 TCP server task > read data fail\n");
-//		}
-//	}
-//}
-
 /******************************************************************************
  * FunctionName : user_init
  * Description  : entry of user application, init user function here
@@ -156,8 +83,8 @@ uint32 user_rf_cal_sector_set(void)
 *******************************************************************************/
 void user_init(void)
 {
-    /* WiFi station + soft-AP mode */
-    wifi_set_opmode(STATIONAP_MODE);
+    /* soft-AP mode */
+    wifi_set_opmode(SOFTAP_MODE);
 
     struct softap_config *config = (struct softap_config *)zalloc(sizeof(struct softap_config)); //initialization.
     wifi_softap_get_config(config);
@@ -169,12 +96,5 @@ void user_init(void)
     wifi_softap_set_config(config);
     free(config);
 
-    struct station_config *sconfig = (struct station_config *)zalloc(sizeof(struct station_config));
-    sprintf(sconfig->ssid, WIFI_SSID);
-    sprintf(sconfig->password, WIFI_PASSWD);
-    wifi_station_set_config(sconfig);
-    free(sconfig);
-
     http_server_netconn_init();
-//    xTaskCreate(tcp_process, "tcp_process", 512, NULL, 2, NULL);
 }
