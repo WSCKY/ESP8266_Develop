@@ -1,0 +1,31 @@
+non-OTA Partition: (Flash: W25Q32, 4MB)
+
+| <-------- Partition 1 --------> |
+V                                 V
++-----------------+-----------+---+
+| System Program  | User Data | * | (*optional: master_device_key.bin)
+| eagle.flash.bin |           |   |
++-----------------+-----------+---+
+|                                 |
+v                                 v
+0x00000                     0x20000(128KB)
+
+| <-------------------- Partition 2 -------------------> |
+V                                                        V
++---------------------+-----------+----------------------+
+|   System Program    | User Data |     System Param     |
+| eagle.irom0text.bin |           | esp_init & blank.bin |
++---------------------+-----------+----------------------+
+|                                 |                      |
+v                                 v                      v
+0x20000(128KB)             0x3FC000(4080KB)       0x400000(4096KB)
+
+esp_init & blank.bin:
++---------------------------+-----------+
+| esp_init_data_default.bin | blank.bin |
++---------------------------+-----------+
+|         2 Sectors         | 2 Sectors |
++---------------------------+-----------+
+|                           |           |
+v                           v           v
+0x3FC000(4080KB)     0x3FE000(4088KB) 0x400000(4096KB)
