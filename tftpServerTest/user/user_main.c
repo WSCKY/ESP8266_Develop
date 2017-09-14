@@ -24,7 +24,6 @@
 
 #include "esp_common.h"
 #include "user_config.h"
-#include "httpserver-netconn.h"
 
 /******************************************************************************
  * FunctionName : user_rf_cal_sector_set
@@ -91,6 +90,4 @@ void user_init(void)
     sprintf(config->password, MY_AP_PASSWD);
     wifi_station_set_config(config);
     free(config);
-
-    http_server_netconn_init();
 }
