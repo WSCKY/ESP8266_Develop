@@ -29,7 +29,6 @@
 #define MY_AP_PASSWD     "LoserLoser"
 
 #define MAX_CONN         4
-#define WEB_SERVER_PORT  80
 #define TFTP_SERVER_PORT 69
 
 #endif
