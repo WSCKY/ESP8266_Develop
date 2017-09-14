@@ -83,17 +83,13 @@ uint32 user_rf_cal_sector_set(void)
 *******************************************************************************/
 void user_init(void)
 {
-    /* soft-AP mode */
-    wifi_set_opmode(SOFTAP_MODE);
+    /* station mode */
+    wifi_set_opmode(STATION_MODE);
 
-    struct softap_config *config = (struct softap_config *)zalloc(sizeof(struct softap_config)); //initialization.
-    wifi_softap_get_config(config);
+    struct station_config *config = (struct station_config *)zalloc(sizeof(struct station_config));
     sprintf(config->ssid, MY_AP_SSID);
     sprintf(config->password, MY_AP_PASSWD);
-    config->authmode = AUTH_WPA_WPA2_PSK;
-    config->ssid_len = 0;
-    config->max_connection = MAX_CONN;
-    wifi_softap_set_config(config);
+    wifi_station_set_config(config);
     free(config);
 
     http_server_netconn_init();
