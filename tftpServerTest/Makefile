@@ -33,7 +33,7 @@ GEN_BINS= eagle.app.v6.bin
 SPECIAL_MKTARGETS=$(APP_MKTARGETS)
 SUBDIRS=    \
 	user   \
-        httpd
+        tftpd
 
 endif # } PDIR
 
@@ -57,7 +57,7 @@ endif
 
 COMPONENTS_eagle.app.v6 = \
 	user/libuser.a    \
-	httpd/libhttpd.a
+	tftpd/libtftpd.a
 
 LINKFLAGS_eagle.app.v6 = \
 	-L$(SDK_PATH)/lib        \
