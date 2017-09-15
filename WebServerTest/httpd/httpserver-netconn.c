@@ -93,14 +93,14 @@ static void http_server_serve(struct netconn *conn)
       if ((buflen >=5) && (strncmp(buf, "GET /", 5) == 0))
       {
         /* Check if request to get ST.gif */ 
-        if (strncmp((char const *)buf,"GET /img/fluidicon.png", 29) == 0)
+        if (strncmp((char const *)buf,"GET /img/fluidicon.png", 22) == 0)
         {
           /* Check if request to get logo.jpg */
           fs_open(&file, "/img/fluidicon.png");
           netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
           fs_close(&file);
         }
-        else if((strncmp(buf, "GET /index.html", 19) == 0)||(strncmp(buf, "GET / ", 6) == 0))
+        else if((strncmp(buf, "GET /index.html", 15) == 0)||(strncmp(buf, "GET / ", 6) == 0))
         {
           /* Load index page */
           fs_open(&file, "/index.html");
