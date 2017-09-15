@@ -98,7 +98,7 @@
 #include "lwip/ip.h"
 #include "lwip/tcp.h"
 #include "lwip/sys.h"
-#include "lwip/lwip/inet.h"
+#include "lwip/ipv4/lwip/inet.h"
 
 #include <string.h>
 #include <stdlib.h>
