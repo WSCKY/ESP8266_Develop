@@ -54,7 +54,6 @@
 #include <stdio.h>
 #include "httpserver-netconn.h"
 #include "freertos/task.h"
-#include "freertos/cmsis_os.h"
 #include "user_config.h"
 
 /* Private typedef -----------------------------------------------------------*/
