@@ -90,4 +90,6 @@ void user_init(void)
     sprintf(config->password, MY_AP_PASSWD);
     wifi_station_set_config(config);
     free(config);
+
+    tftpd_init();
 }
