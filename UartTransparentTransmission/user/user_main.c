@@ -25,6 +25,7 @@
 #include "esp_common.h"
 #include "user_config.h"
 #include "lwip/lwip/sockets.h"
+#include "freertos/semphr.h"
 #include "uart.h"
 
 /******************************************************************************
@@ -76,10 +77,13 @@ uint32 user_rf_cal_sector_set(void)
     return rf_cal_sec;
 }
 
+LOCAL int32_t sock_fd = -1;
+LOCAL uint8_t sock_to_initialized = 0;
+LOCAL struct sockaddr_in sock_to;
+
 #define UDP_DATA_LEN 256
 void udp_process(void *p)
 {
-	LOCAL int32_t sock_fd;
 	struct sockaddr_in server_addr;
 	memset(&server_addr, 0, sizeof(struct sockaddr_in));
 	server_addr.sin_family = AF_INET;
@@ -119,6 +123,10 @@ void udp_process(void *p)
         ret = recvfrom(sock_fd, (uint8_t *)udp_msg, UDP_DATA_LEN, 0, (struct sockaddr *)&from, (socklen_t *)&fromlen);
         if(ret > 0) {
         	uart_send_buffer(UART0, (uint8_t *)udp_msg, fromlen);
+        	if(sock_to_initialized == 0) {
+        		memcpy(&sock_to, &from, sizeof(struct sockaddr_in));
+        		sock_to_initialized = 1;
+        	}
         	printf("ESP8266 UDP task > recv %d Bytes from %s, Port %d\n", ret, inet_ntoa(from.sin_addr), ntohs(from.sin_port));
 //        	sendto(sock_fd, (uint8_t *)udp_msg, ret, 0, (struct sockaddr *)&from, fromlen);
         }
@@ -128,6 +136,76 @@ void udp_process(void *p)
 		udp_msg = NULL;
 	}
 	close(sock_fd);
+}
+
+uint8 fifo_len = 0;
+LOCAL uint8 fifo_tmp[20] = {0};
+
+xSemaphoreHandle xSemaphore;
+void udp_senddata(void *p) {
+	vSemaphoreCreateBinary( xSemaphore );
+	if( xSemaphore != NULL ) {
+		// The semaphore was created successfully.
+		// The semaphore can now be used.
+	}
+	while(1) {
+		if( xSemaphoreTake( xSemaphore, portMAX_DELAY ) == pdTRUE ) {
+			if(sock_fd != -1 && sock_to_initialized == 1) {
+				sendto(sock_fd, fifo_tmp, fifo_len, 0, (struct sockaddr *)&sock_to, sizeof(struct sockaddr_in));
+			}
+		}
+	}
+}
+
+static signed portBASE_TYPE xHigherPriorityTaskWoken = pdTRUE;
+LOCAL void
+uart0_rx_intr_handler(void *para)
+{
+    /* uart0 and uart1 intr combine togther, when interrupt occur, see reg 0x3ff20020, bit2, bit0 represents
+    * uart1 and uart0 respectively
+    */
+    uint8 RcvChar;
+    uint8 uart_no = UART0;//UartDev.buff_uart_no;
+    uint8 buf_idx = 0;
+
+    uint32 uart_intr_status = READ_PERI_REG(UART_INT_ST(uart_no)) ;
+
+    while (uart_intr_status != 0x0) {
+        if (UART_FRM_ERR_INT_ST == (uart_intr_status & UART_FRM_ERR_INT_ST)) {
+            WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_FRM_ERR_INT_CLR);
+        } else if (UART_RXFIFO_FULL_INT_ST == (uart_intr_status & UART_RXFIFO_FULL_INT_ST)) {
+            fifo_len = (READ_PERI_REG(UART_STATUS(uart_no)) >> UART_RXFIFO_CNT_S)&UART_RXFIFO_CNT;
+            for(buf_idx = 0; buf_idx < fifo_len; buf_idx ++) {
+            	fifo_tmp[buf_idx] = READ_PERI_REG(UART_FIFO(uart_no)) & 0xFF;
+            }
+            if(sock_fd != -1 && sock_to_initialized == 1) {
+            	xSemaphoreGiveFromISR( xSemaphore, &xHigherPriorityTaskWoken );
+//            	printf("fifo_len = %d, str: %s \n", fifo_len, fifo_tmp);
+//            	printf("send %d bytes to %s, %d\n", fifo_len, inet_ntoa(sock_to.sin_addr), ntohs(sock_to.sin_port));
+            }
+
+            WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_RXFIFO_FULL_INT_CLR);
+        } else if (UART_RXFIFO_TOUT_INT_ST == (uart_intr_status & UART_RXFIFO_TOUT_INT_ST)) {
+            fifo_len = (READ_PERI_REG(UART_STATUS(uart_no)) >> UART_RXFIFO_CNT_S)&UART_RXFIFO_CNT;
+            for(buf_idx = 0; buf_idx < fifo_len; buf_idx ++) {
+            	fifo_tmp[buf_idx] = READ_PERI_REG(UART_FIFO(uart_no)) & 0xFF;
+            }
+            if(sock_fd != -1 && sock_to_initialized == 1) {
+            	xSemaphoreGiveFromISR( xSemaphore, &xHigherPriorityTaskWoken );
+//            	printf("fifo_len = %d, str: %s \n", fifo_len, fifo_tmp);
+//            	printf("send %d bytes to %s, %d\n", fifo_len, inet_ntoa(sock_to.sin_addr), ntohs(sock_to.sin_port));
+            }
+
+            WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_RXFIFO_TOUT_INT_CLR);
+        } else if (UART_TXFIFO_EMPTY_INT_ST == (uart_intr_status & UART_TXFIFO_EMPTY_INT_ST)) {
+            WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_TXFIFO_EMPTY_INT_CLR);
+            CLEAR_PERI_REG_MASK(UART_INT_ENA(uart_no), UART_TXFIFO_EMPTY_INT_ENA);
+        } else {
+            //skip
+        }
+
+        uart_intr_status = READ_PERI_REG(UART_INT_ST(uart_no)) ;
+    }
 }
 
 /******************************************************************************
@@ -158,5 +236,8 @@ void user_init(void)
 	free(stconfig);
 
 	uart_init_new();
+	UART_intr_handler_register(uart0_rx_intr_handler, NULL);
+	ETS_UART_INTR_ENABLE();
     xTaskCreate(udp_process, "udp_process", 512, NULL, 2, NULL);
+    xTaskCreate(udp_senddata, "udp_send", 512, NULL, 1, NULL);
 }
