@@ -25,6 +25,7 @@
 #include "esp_common.h"
 #include "user_config.h"
 #include "lwip/lwip/sockets.h"
+#include "uart.h"
 
 /******************************************************************************
  * FunctionName : user_rf_cal_sector_set
@@ -155,5 +156,6 @@ void user_init(void)
 	wifi_station_set_config(stconfig);
 	free(stconfig);
 
+	uart_init_new();
     xTaskCreate(udp_process, "udp_process", 512, NULL, 2, NULL);
 }
