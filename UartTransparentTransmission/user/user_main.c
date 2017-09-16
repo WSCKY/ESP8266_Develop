@@ -76,7 +76,7 @@ uint32 user_rf_cal_sector_set(void)
     return rf_cal_sec;
 }
 
-#define UDP_DATA_LEN 64
+#define UDP_DATA_LEN 256
 void udp_process(void *p)
 {
 	LOCAL int32_t sock_fd;
