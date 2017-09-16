@@ -338,7 +338,7 @@ void uart_send_buffer(uint8 uart, uint8 *p, uint8_t len)
 	}
 }
 
-#if 1
+#if 0
 /* rx interrupt service (test) */
 LOCAL void
 uart0_rx_intr_handler(void *para)
@@ -420,7 +420,7 @@ uart_init_new(void)
     UART_IntrConfig(UART0, &uart_intr);
 
     UART_SetPrintPort(UART1);
-#if 1
+#if 0
     UART_intr_handler_register(uart0_rx_intr_handler, NULL);
     ETS_UART_INTR_ENABLE();
 #endif
