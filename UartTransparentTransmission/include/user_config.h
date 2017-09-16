@@ -25,10 +25,12 @@
 #ifndef __USER_CONFIG_H__
 #define __USER_CONFIG_H__
 
-#define MY_AP_SSID       "kyChu_Wifi"
-#define MY_AP_PASSWD     "12345678"
+#define MY_AP_SSID       "Hey,Loser!"
+#define MY_AP_PASSWD     "LoserLoser"
 
-#define UDP_LOCAL_PORT   1200
+#define USR_AP_SSID       "UartUdpTransmission"
+#define USR_AP_PASSWD     "12345678"
+
+#define UDP_LOCAL_PORT   6000
 
 #endif
-
