@@ -331,6 +331,13 @@ UART_IntrConfig(UART_Port uart_no,  UART_IntrConfTypeDef *pUARTIntrConf)
     SET_PERI_REG_MASK(UART_INT_ENA(uart_no), pUARTIntrConf->UART_IntrEnMask);
 }
 
+void uart_send_buffer(uint8 uart, uint8 *p, uint8_t len)
+{
+	while(len --) {
+		uart_tx_one_char(uart, *p ++);
+	}
+}
+
 #if 1
 /* rx interrupt service (test) */
 LOCAL void
