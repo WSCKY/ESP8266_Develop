@@ -106,6 +106,7 @@ void UART_SetParity(UART_Port uart_no, UART_ParityMode Parity_mode) ;
 void UART_SetBaudrate(UART_Port uart_no, uint32 baud_rate);
 void UART_SetFlowCtrl(UART_Port uart_no, UART_HwFlowCtrl flow_ctrl, uint8 rx_thresh);
 void UART_SetLineInverse(UART_Port uart_no, UART_LineLevelInverse inverse_mask) ;
+void uart_send_buffer(uint8 uart, uint8 *p, uint8_t len);
 void uart_init_new(void);
 
 #endif
