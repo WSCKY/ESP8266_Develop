@@ -136,18 +136,24 @@ void udp_process(void *p)
 *******************************************************************************/
 void user_init(void)
 {
-    /* softAP mode */
-    wifi_set_opmode(SOFTAP_MODE);
+	/* station + softAP mode */
+	wifi_set_opmode(STATIONAP_MODE);
 
-    struct softap_config *config = (struct softap_config *)zalloc(sizeof(struct softap_config)); //initialization.
-    wifi_softap_get_config(config);
-    sprintf(config->ssid, MY_AP_SSID);
-    sprintf(config->password, MY_AP_PASSWD);
-    config->authmode = AUTH_WPA_WPA2_PSK;
-    config->ssid_len = 0;
-    config->max_connection = 4;
-    wifi_softap_set_config(config);
-    free(config);
+    struct softap_config *apconfig = (struct softap_config *)zalloc(sizeof(struct softap_config)); //initialization.
+    wifi_softap_get_config(apconfig);
+    sprintf(apconfig->ssid, USR_AP_SSID);
+    sprintf(apconfig->password, USR_AP_PASSWD);
+    apconfig->authmode = AUTH_WPA_WPA2_PSK;
+    apconfig->ssid_len = 0;
+    apconfig->max_connection = 4;
+    wifi_softap_set_config(apconfig);
+    free(apconfig);
+
+	struct station_config *stconfig = (struct station_config *)zalloc(sizeof(struct station_config));
+	sprintf(stconfig->ssid, MY_AP_SSID);
+	sprintf(stconfig->password, MY_AP_PASSWD);
+	wifi_station_set_config(stconfig);
+	free(stconfig);
 
     xTaskCreate(udp_process, "udp_process", 512, NULL, 2, NULL);
 }
