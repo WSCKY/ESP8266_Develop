@@ -122,7 +122,7 @@ void udp_process(void *p)
         fromlen = sizeof(struct sockaddr_in);
         ret = recvfrom(sock_fd, (uint8_t *)udp_msg, UDP_DATA_LEN, 0, (struct sockaddr *)&from, (socklen_t *)&fromlen);
         if(ret > 0) {
-        	uart_send_buffer(UART0, (uint8_t *)udp_msg, fromlen);
+        	uart_send_buffer(UART0, (uint8_t *)udp_msg, ret);
         	if(sock_to_initialized == 0) {
         		memcpy(&sock_to, &from, sizeof(struct sockaddr_in));
         		sock_to_initialized = 1;
