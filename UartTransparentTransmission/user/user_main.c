@@ -127,8 +127,7 @@ void udp_process(void *p)
         		memcpy(&sock_to, &from, sizeof(struct sockaddr_in));
         		sock_to_initialized = 1;
         	}
-        	printf("ESP8266 UDP task > recv %d Bytes from %s, Port %d\n", ret, inet_ntoa(from.sin_addr), ntohs(from.sin_port));
-//        	sendto(sock_fd, (uint8_t *)udp_msg, ret, 0, (struct sockaddr *)&from, fromlen);
+//        	printf("ESP8266 UDP task > recv %d Bytes from %s, Port %d\n", ret, inet_ntoa(from.sin_addr), ntohs(from.sin_port));
         }
 	}
 	if(udp_msg) {
