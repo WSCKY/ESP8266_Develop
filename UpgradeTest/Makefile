@@ -27,6 +27,9 @@ BIN_PATH = $(shell pwd)/../Binary
 export BIN_PATH
 endif
 
+#default loadbin is non-OTA
+loadbin ?= 0
+
 ifndef PDIR # {
 GEN_IMAGES= eagle.app.v6.out
 GEN_BINS= eagle.app.v6.bin
@@ -141,5 +144,17 @@ sinclude $(SDK_PATH)/Makefile
 FORCE:
 
 upload: | $(BIN_PATH)
+ifeq ($(loadbin), 0)
 	@esptool.py --port /dev/ttyUSB0 write_flash -ff 80m -fm dio -fs 4m 0x00000 $(BIN_PATH)/eagle.flash.bin 0x20000 $(BIN_PATH)/eagle.irom0text.bin
+else
+    ifeq ($(loadbin), 1)
+	@echo "loadbin 1"
+    else
+        ifeq ($(loadbin), 2)
+		@echo "loadbin 2"
+        else
+		@echo "load error!!!"
+        endif
+    endif
+endif
 
