@@ -102,5 +102,6 @@ void user_init(void)
 	wifi_station_set_config(stconfig);
 	free(stconfig);
 
+	uart_init_new();
     http_server_netconn_init();
 }
