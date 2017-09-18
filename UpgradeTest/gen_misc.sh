@@ -14,6 +14,12 @@ export BIN_PATH=$(pwd)/../Binary
 echo "gen_misc.sh version 20150911"
 echo ""
 
+if [ $1 ]; then
+echo "input $1"
+else
+echo "input nothing..."
+fi
+
 if [ $SDK_PATH ]; then
     echo "SDK_PATH:"
     echo "$SDK_PATH"
