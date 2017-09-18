@@ -28,6 +28,9 @@
 #define MY_AP_SSID       "Hey,Loser!"
 #define MY_AP_PASSWD     "LoserLoser"
 
+#define USR_AP_SSID       "TestForOTA"
+#define USR_AP_PASSWD     "12345678"
+
 #define WEB_SERVER_PORT  80
 
 #endif
