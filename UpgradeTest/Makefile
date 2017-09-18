@@ -140,18 +140,24 @@ DDEFINES +=				\
 INCLUDES := $(INCLUDES) -I $(PDIR)include
 sinclude $(SDK_PATH)/Makefile
 
-.PHONY: FORCE upload
+.PHONY: FORCE upload loadboot loadparam
 FORCE:
+
+loadboot: | $(BIN_PATH)
+	@esptool.py --port /dev/ttyUSB0 write_flash -ff 80m -fm dio --flash_size 4MB-c1 0x00000 $(BIN_PATH)/boot_v1.7.bin
+
+loadparam: | $(BIN_PATH)
+	@esptool.py --port /dev/ttyUSB0 write_flash -ff 80m -fm dio --flash_size 4MB-c1 0x3FC000 $(BIN_PATH)/esp_init_data_default.bin 0x3FE000 $(BIN_PATH)/blank.bin
 
 upload: | $(BIN_PATH)
 ifeq ($(loadbin), 0)
-	@esptool.py --port /dev/ttyUSB0 write_flash -ff 80m -fm dio -fs 4m 0x00000 $(BIN_PATH)/eagle.flash.bin 0x20000 $(BIN_PATH)/eagle.irom0text.bin
+	@esptool.py --port /dev/ttyUSB0 write_flash -ff 80m -fm dio --flash_size 4MB 0x00000 $(BIN_PATH)/eagle.flash.bin 0x20000 $(BIN_PATH)/eagle.irom0text.bin
 else
     ifeq ($(loadbin), 1)
-	@echo "loadbin 1"
+	@esptool.py --port /dev/ttyUSB0 write_flash -ff 80m -fm dio --flash_size 4MB-c1 0x01000 $(BIN_PATH)/upgrade/user1.4096.new.6.bin
     else
         ifeq ($(loadbin), 2)
-		@echo "loadbin 2"
+		@esptool.py --port /dev/ttyUSB0 write_flash -ff 80m -fm dio --flash_size 4MB-c1 0x101000 $(BIN_PATH)/upgrade/user2.4096.new.6.bin
         else
 		@echo "load error!!!"
         endif
