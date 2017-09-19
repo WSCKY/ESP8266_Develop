@@ -98,9 +98,9 @@ LOCAL void uart0_rx_intr_handler(void *para)
             for(buf_idx = 0; buf_idx < fifo_len; buf_idx ++) {
             	fifo_tmp[buf_idx] = READ_PERI_REG(UART_FIFO(uart_no)) & 0xFF;
             }
-            if(strncmp((const char *)fifo_tmp, "start", 5)) {
+            if(strncmp((const char *)fifo_tmp, "start", 5) == 0) {
             	printf("recv 'start' cmd.\n");
-            } else if(strncmp((const char *)fifo_tmp, "stop", 4)) {
+            } else if(strncmp((const char *)fifo_tmp, "stop", 4) == 0) {
             	printf("recv 'stop' cmd.\n");
             } else {
             	printf("cmd error!");
@@ -112,9 +112,9 @@ LOCAL void uart0_rx_intr_handler(void *para)
 			for(buf_idx = 0; buf_idx < fifo_len; buf_idx ++) {
 				fifo_tmp[buf_idx] = READ_PERI_REG(UART_FIFO(uart_no)) & 0xFF;
 			}
-			if(strncmp((const char *)fifo_tmp, "start", 5)) {
+			if(strncmp((const char *)fifo_tmp, "start", 5) == 0) {
 				printf("recv 'start' cmd.\n");
-			} else if(strncmp((const char *)fifo_tmp, "stop", 4)) {
+			} else if(strncmp((const char *)fifo_tmp, "stop", 4) == 0) {
 				printf("recv 'stop' cmd.\n");
 			} else {
 				printf("cmd error!");
