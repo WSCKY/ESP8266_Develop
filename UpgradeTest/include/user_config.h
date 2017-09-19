@@ -26,16 +26,17 @@
 #define __USER_CONFIG_H__
 
 #if 0
-#define MY_AP_SSID       "Hey,Loser!"
-#define MY_AP_PASSWD     "LoserLoser"
+#define MY_AP_SSID           "Hey,Loser!"
+#define MY_AP_PASSWD         "LoserLoser"
 #else
-#define MY_AP_SSID       "Lord_KaiYangChu"
-#define MY_AP_PASSWD     "royal_pray@pray"
+#define MY_AP_SSID           "Lord_KaiYangChu"
+#define MY_AP_PASSWD         "royal_pray@pray"
 #endif
 
-#define USR_AP_SSID       "TestForOTA"
-#define USR_AP_PASSWD     "12345678"
+#define USR_AP_SSID          "TestForOTA"
+#define USR_AP_PASSWD        "12345678"
 
-#define WEB_SERVER_PORT  80
+#define TFTP_SERVER_PORT     69
+#define WEB_SERVER_PORT      80
 
 #endif
