@@ -102,8 +102,11 @@ LOCAL void uart0_rx_intr_handler(void *para)
             if(strncmp((const char *)fifo_tmp, "start", 5) == 0) {
             	printf("recv 'start' cmd.\n");
             	system_upgrade_flag_set(UPGRADE_FLAG_START);
-            } else if(strncmp((const char *)fifo_tmp, "stop", 4) == 0) {
-            	printf("recv 'stop' cmd.\n");
+            } else if(strncmp((const char *)fifo_tmp, "reboot", 6) == 0) {
+            	printf("recv 'reboot' cmd.\n");
+            	system_upgrade_reboot();
+            } else if(strncmp((const char *)fifo_tmp, "finish", 6) == 0) {
+            	printf("recv 'finish' cmd.\n");
             	system_upgrade_flag_set(UPGRADE_FLAG_FINISH);
             } else {
             	printf("cmd error!");
@@ -118,8 +121,11 @@ LOCAL void uart0_rx_intr_handler(void *para)
 			if(strncmp((const char *)fifo_tmp, "start", 5) == 0) {
 				printf("recv 'start' cmd.\n");
 				system_upgrade_flag_set(UPGRADE_FLAG_START);
-			} else if(strncmp((const char *)fifo_tmp, "stop", 4) == 0) {
-				printf("recv 'stop' cmd.\n");
+			} else if(strncmp((const char *)fifo_tmp, "reboot", 6) == 0) {
+			    printf("recv 'reboot' cmd.\n");
+			    system_upgrade_reboot();
+			} else if(strncmp((const char *)fifo_tmp, "finish", 6) == 0) {
+				printf("recv 'finish' cmd.\n");
 				system_upgrade_flag_set(UPGRADE_FLAG_FINISH);
 			} else {
 				printf("cmd error!");
