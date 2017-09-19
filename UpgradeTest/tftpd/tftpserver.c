@@ -555,6 +555,8 @@ int tftp_process_write(struct udp_pcb *upcb, ip_addr_t *to, unsigned short to_po
   /* set callback for receives on this UDP PCB  */
   udp_recv(upcb, wrq_recv_callback, args);
 
+  system_upgrade_erase();
+
   /* initiate the write transaction by sending the first ack */
   tftp_send_ack_packet(upcb, to, to_port, args->block);
 
@@ -632,6 +634,8 @@ void process_tftp_request(struct pbuf *pkt_buf, ip_addr_t *addr, u16_t port)
 //      {
 //        return;
 //      }
+
+      system_upgrade_init();
 
 //      printf("file: %s.\n", FileName);
         
