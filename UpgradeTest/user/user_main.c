@@ -173,6 +173,7 @@ void user_init(void)
 	uart_init_new();
 	UART_intr_handler_register(uart0_rx_intr_handler, NULL);
 	ETS_UART_INTR_ENABLE();
+	tftpd_init();
     http_server_netconn_init();
 
     printf("Version Identifier: V0.0.1\n");
