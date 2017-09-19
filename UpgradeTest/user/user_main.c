@@ -26,6 +26,7 @@
 #include "user_config.h"
 #include "httpserver-netconn.h"
 #include "uart.h"
+#include "espressif/upgrade.h"
 
 /******************************************************************************
  * FunctionName : user_rf_cal_sector_set
@@ -100,8 +101,10 @@ LOCAL void uart0_rx_intr_handler(void *para)
             }
             if(strncmp((const char *)fifo_tmp, "start", 5) == 0) {
             	printf("recv 'start' cmd.\n");
+            	system_upgrade_flag_set(UPGRADE_FLAG_START);
             } else if(strncmp((const char *)fifo_tmp, "stop", 4) == 0) {
             	printf("recv 'stop' cmd.\n");
+            	system_upgrade_flag_set(UPGRADE_FLAG_FINISH);
             } else {
             	printf("cmd error!");
             }
@@ -114,8 +117,10 @@ LOCAL void uart0_rx_intr_handler(void *para)
 			}
 			if(strncmp((const char *)fifo_tmp, "start", 5) == 0) {
 				printf("recv 'start' cmd.\n");
+				system_upgrade_flag_set(UPGRADE_FLAG_START);
 			} else if(strncmp((const char *)fifo_tmp, "stop", 4) == 0) {
 				printf("recv 'stop' cmd.\n");
+				system_upgrade_flag_set(UPGRADE_FLAG_FINISH);
 			} else {
 				printf("cmd error!");
 			}
