@@ -75,6 +75,50 @@ uint32 user_rf_cal_sector_set(void)
     return rf_cal_sec;
 }
 
+uint8 fifo_len = 0;
+LOCAL uint8 fifo_tmp[20] = {0};
+
+LOCAL void uart0_rx_intr_handler(void *para)
+{
+    /* uart0 and uart1 intr combine togther, when interrupt occur, see reg 0x3ff20020, bit2, bit0 represents
+    * uart1 and uart0 respectively
+    */
+    uint8 RcvChar;
+    uint8 uart_no = UART0;//UartDev.buff_uart_no;
+    uint8 buf_idx = 0;
+
+    uint32 uart_intr_status = READ_PERI_REG(UART_INT_ST(uart_no)) ;
+
+    while (uart_intr_status != 0x0) {
+        if (UART_FRM_ERR_INT_ST == (uart_intr_status & UART_FRM_ERR_INT_ST)) {
+            WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_FRM_ERR_INT_CLR);
+        } else if (UART_RXFIFO_FULL_INT_ST == (uart_intr_status & UART_RXFIFO_FULL_INT_ST)) {
+            fifo_len = (READ_PERI_REG(UART_STATUS(uart_no)) >> UART_RXFIFO_CNT_S)&UART_RXFIFO_CNT;
+            for(buf_idx = 0; buf_idx < fifo_len; buf_idx ++) {
+            	fifo_tmp[buf_idx] = READ_PERI_REG(UART_FIFO(uart_no)) & 0xFF;
+            }
+			printf("fifo_len = %d, str: %s \n", fifo_len, fifo_tmp);
+
+            WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_RXFIFO_FULL_INT_CLR);
+        } else if (UART_RXFIFO_TOUT_INT_ST == (uart_intr_status & UART_RXFIFO_TOUT_INT_ST)) {
+        	fifo_len = (READ_PERI_REG(UART_STATUS(uart_no)) >> UART_RXFIFO_CNT_S)&UART_RXFIFO_CNT;
+			for(buf_idx = 0; buf_idx < fifo_len; buf_idx ++) {
+				fifo_tmp[buf_idx] = READ_PERI_REG(UART_FIFO(uart_no)) & 0xFF;
+			}
+			printf("fifo_len = %d, str: %s \n", fifo_len, fifo_tmp);
+
+            WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_RXFIFO_TOUT_INT_CLR);
+        } else if (UART_TXFIFO_EMPTY_INT_ST == (uart_intr_status & UART_TXFIFO_EMPTY_INT_ST)) {
+            WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_TXFIFO_EMPTY_INT_CLR);
+            CLEAR_PERI_REG_MASK(UART_INT_ENA(uart_no), UART_TXFIFO_EMPTY_INT_ENA);
+        } else {
+            //skip
+        }
+
+        uart_intr_status = READ_PERI_REG(UART_INT_ST(uart_no)) ;
+    }
+}
+
 /******************************************************************************
  * FunctionName : user_init
  * Description  : entry of user application, init user function here
@@ -103,5 +147,7 @@ void user_init(void)
 	free(stconfig);
 
 	uart_init_new();
+	UART_intr_handler_register(uart0_rx_intr_handler, NULL);
+	ETS_UART_INTR_ENABLE();
     http_server_netconn_init();
 }
