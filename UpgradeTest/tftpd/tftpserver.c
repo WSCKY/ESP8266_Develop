@@ -52,7 +52,7 @@
 
 #include "tftp_data.h"
 #include "user_config.h"
-
+#include "espressif/upgrade.h"
 
 typedef struct
 {
@@ -451,7 +451,9 @@ void wrq_recv_callback(void *arg, struct udp_pcb *upcb, struct pbuf *pkt_buf, ip
     tftp_cleanup_wr(upcb, args);
     pbuf_free(pkt_buf);
 
-    printf("upgrade complete.\n");
+    system_upgrade_flag_set(UPGRADE_FLAG_FINISH);
+    printf("upgrade complete. reboot automatically...\n");
+    system_upgrade_reboot();
   }
   else
   {
@@ -558,6 +560,7 @@ int tftp_process_write(struct udp_pcb *upcb, ip_addr_t *to, unsigned short to_po
   /* set callback for receives on this UDP PCB  */
   udp_recv(upcb, wrq_recv_callback, args);
 
+  system_upgrade_flag_set(UPGRADE_FLAG_START);
   system_upgrade_erase();
 
   /* initiate the write transaction by sending the first ack */
