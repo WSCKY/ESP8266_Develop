@@ -419,6 +419,7 @@ void wrq_recv_callback(void *arg, struct udp_pcb *upcb, struct pbuf *pkt_buf, ip
 //      tftp_cleanup_wr(upcb, args); /* close the connection */
 //    }
 //
+	  system_upgrade((uint8_t *)pkt_buf->payload + TFTP_DATA_PKT_HDR_LEN, pkt_buf->len - TFTP_DATA_PKT_HDR_LEN);
     /* update our block number to match the block number just received */
     args->block++;
     
@@ -449,6 +450,8 @@ void wrq_recv_callback(void *arg, struct udp_pcb *upcb, struct pbuf *pkt_buf, ip
   {
     tftp_cleanup_wr(upcb, args);
     pbuf_free(pkt_buf);
+
+    printf("upgrade complete.\n");
   }
   else
   {
