@@ -174,4 +174,6 @@ void user_init(void)
 	UART_intr_handler_register(uart0_rx_intr_handler, NULL);
 	ETS_UART_INTR_ENABLE();
     http_server_netconn_init();
+
+    printf("Version Identifier: V0.0.1\n");
 }
