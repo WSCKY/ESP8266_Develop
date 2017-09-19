@@ -176,5 +176,5 @@ void user_init(void)
 	tftpd_init();
     http_server_netconn_init();
 
-    printf("Version Identifier: V0.0.2\n");
+    printf("Version Identifier: V0.0.3\n");
 }
