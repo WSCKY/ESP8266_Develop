@@ -98,7 +98,13 @@ LOCAL void uart0_rx_intr_handler(void *para)
             for(buf_idx = 0; buf_idx < fifo_len; buf_idx ++) {
             	fifo_tmp[buf_idx] = READ_PERI_REG(UART_FIFO(uart_no)) & 0xFF;
             }
-			printf("fifo_len = %d, str: %s \n", fifo_len, fifo_tmp);
+            if(strncmp((const char *)fifo_tmp, "start", 5)) {
+            	printf("recv 'start' cmd.\n");
+            } else if(strncmp((const char *)fifo_tmp, "stop", 4)) {
+            	printf("recv 'stop' cmd.\n");
+            } else {
+            	printf("cmd error!");
+            }
 
             WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_RXFIFO_FULL_INT_CLR);
         } else if (UART_RXFIFO_TOUT_INT_ST == (uart_intr_status & UART_RXFIFO_TOUT_INT_ST)) {
@@ -106,7 +112,13 @@ LOCAL void uart0_rx_intr_handler(void *para)
 			for(buf_idx = 0; buf_idx < fifo_len; buf_idx ++) {
 				fifo_tmp[buf_idx] = READ_PERI_REG(UART_FIFO(uart_no)) & 0xFF;
 			}
-			printf("fifo_len = %d, str: %s \n", fifo_len, fifo_tmp);
+			if(strncmp((const char *)fifo_tmp, "start", 5)) {
+				printf("recv 'start' cmd.\n");
+			} else if(strncmp((const char *)fifo_tmp, "stop", 4)) {
+				printf("recv 'stop' cmd.\n");
+			} else {
+				printf("cmd error!");
+			}
 
             WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_RXFIFO_TOUT_INT_CLR);
         } else if (UART_TXFIFO_EMPTY_INT_ST == (uart_intr_status & UART_TXFIFO_EMPTY_INT_ST)) {
