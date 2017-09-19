@@ -128,9 +128,9 @@ static void fs_close() {
 
 static void fs_read(uint8_t *pBuf, unsigned int len, unsigned int *rd) {
 	unsigned int l = len;
-	if(fs_seek < sizeof(Testdata)) {
-		if(sizeof(Testdata) - fs_seek < len) {
-			l = sizeof(Testdata) - fs_seek;
+	if(fs_seek < sizeof(Testdata) - 1) {
+		if(sizeof(Testdata) - fs_seek - 1 < len) {
+			l = sizeof(Testdata) - fs_seek - 1;
 		}
 		memcpy(pBuf, Testdata + fs_seek, l);
 		fs_seek += l;
