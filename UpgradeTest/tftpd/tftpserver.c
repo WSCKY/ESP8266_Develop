@@ -539,6 +539,11 @@ int tftp_process_write(struct udp_pcb *upcb, ip_addr_t *to, unsigned short to_po
 //
 //    return 0;
 //  }
+  if(strncmp((const char *)FileName, ((system_upgrade_userbin_check() == USER_BIN1) ? "user2.bin" : "user1.bin"), 9) != 0) {
+      tftp_send_error_message(upcb, to, to_port, TFTP_ERR_NOTDEFINED);
+      tftp_cleanup_wr(upcb, args);
+      return 0;
+  }
 
   args = mem_malloc(sizeof *args);
   if (!args)
