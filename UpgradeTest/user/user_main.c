@@ -25,6 +25,7 @@
 #include "esp_common.h"
 #include "user_config.h"
 #include "httpserver-netconn.h"
+#include "uart.h"
 
 /******************************************************************************
  * FunctionName : user_rf_cal_sector_set
