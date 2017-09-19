@@ -632,6 +632,8 @@ void process_tftp_request(struct pbuf *pkt_buf, ip_addr_t *addr, u16_t port)
 //      {
 //        return;
 //      }
+
+//      printf("file: %s.\n", FileName);
         
       /* Start the TFTP write mode*/
       tftp_process_write(upcb, addr, port, FileName);
