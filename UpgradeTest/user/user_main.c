@@ -109,7 +109,7 @@ LOCAL void uart0_rx_intr_handler(void *para)
             	printf("recv 'finish' cmd.\n");
             	system_upgrade_flag_set(UPGRADE_FLAG_FINISH);
             } else {
-            	printf("cmd error!");
+            	printf("cmd error!\n");
             }
 
             WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_RXFIFO_FULL_INT_CLR);
@@ -128,7 +128,7 @@ LOCAL void uart0_rx_intr_handler(void *para)
 				printf("recv 'finish' cmd.\n");
 				system_upgrade_flag_set(UPGRADE_FLAG_FINISH);
 			} else {
-				printf("cmd error!");
+				printf("cmd error!\n");
 			}
 
             WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_RXFIFO_TOUT_INT_CLR);
