@@ -59,9 +59,18 @@
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 #define WEBSERVER_THREAD_PRIO    2
+#define DATA_BUFF_LEN            512
+
+#define _HTML_INDEX_LEN          595
+#define _HTML_INDEX_ADDR         0x81000
+#define _HTML_404_LEN            509
+#define _HTML_404_ADDR           0x82000
+#define _HTML_PNG_LEN            88730
+#define _HTML_PNG_ADDR           0x83000
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+uint8_t *data_buffer;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -77,6 +86,8 @@ static void http_server_serve(struct netconn *conn)
   char* buf;
   u16_t buflen;
   struct fs_file file;
+  uint32_t file_len;
+  uint32_t total_wr;
   
   /* Read the data from the port, blocking if nothing yet there. 
    We assume the request (the part we care about) is in one netbuf */
@@ -95,24 +106,54 @@ static void http_server_serve(struct netconn *conn)
         /* Check if request to get header.jpg */
         if (strncmp((char const *)buf,"GET /img/header.png", 19) == 0)
         {
-          /* Check if request to get header.png */
-          fs_open(&file, "/img/header.png");
-          netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
-          fs_close(&file);
+        	data_buffer = (uint8_t *)zalloc(DATA_BUFF_LEN);
+			file_len = DATA_BUFF_LEN;
+			total_wr = 0;
+			while(total_wr < _HTML_PNG_LEN) {
+				if(_HTML_PNG_LEN - total_wr < DATA_BUFF_LEN) file_len = _HTML_PNG_LEN - total_wr;
+				spi_flash_read(_HTML_PNG_ADDR + total_wr, (uint32_t)data_buffer, file_len);
+				netconn_write(conn, (const unsigned char*)data_buffer, (size_t)file_len, NETCONN_NOCOPY);
+				total_wr += file_len;
+			}
+			free(data_buffer);
+//          /* Check if request to get header.png */
+//          fs_open(&file, "/img/header.png");
+//          netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
+//          fs_close(&file);
         }
         else if((strncmp(buf, "GET /index.html", 15) == 0)||(strncmp(buf, "GET / ", 6) == 0))
         {
-          /* Load index page */
-          fs_open(&file, "/index.html");
-          netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
-          fs_close(&file);
+        	data_buffer = (uint8_t *)zalloc(DATA_BUFF_LEN);
+        	file_len = DATA_BUFF_LEN;
+        	total_wr = 0;
+        	while(total_wr < _HTML_INDEX_LEN) {
+        		if(_HTML_INDEX_LEN - total_wr < DATA_BUFF_LEN) file_len = _HTML_INDEX_LEN - total_wr;
+        		spi_flash_read(_HTML_INDEX_ADDR + total_wr, (uint32_t)data_buffer, file_len);
+        		netconn_write(conn, (const unsigned char*)data_buffer, (size_t)file_len, NETCONN_NOCOPY);
+        		total_wr += file_len;
+        	}
+        	free(data_buffer);
+//          /* Load index page */
+//          fs_open(&file, "/index.html");
+//          netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
+//          fs_close(&file);
         }
         else
         {
-          /* Load Error page */
-          fs_open(&file, "/404.html");
-          netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
-          fs_close(&file);
+        	data_buffer = (uint8_t *)zalloc(DATA_BUFF_LEN);
+			file_len = DATA_BUFF_LEN;
+			total_wr = 0;
+			while(total_wr < _HTML_404_LEN) {
+				if(_HTML_404_LEN - total_wr < DATA_BUFF_LEN) file_len = _HTML_404_LEN - total_wr;
+				spi_flash_read(_HTML_404_ADDR + total_wr, (uint32_t)data_buffer, file_len);
+				netconn_write(conn, (const unsigned char*)data_buffer, (size_t)file_len, NETCONN_NOCOPY);
+				total_wr += file_len;
+			}
+			free(data_buffer);
+//          /* Load Error page */
+//          fs_open(&file, "/404.html");
+//          netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
+//          fs_close(&file);
         }
       }
     }
