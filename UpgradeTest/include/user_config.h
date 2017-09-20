@@ -25,7 +25,7 @@
 #ifndef __USER_CONFIG_H__
 #define __USER_CONFIG_H__
 
-#if 0
+#if 1
 #define MY_AP_SSID           "Hey,Loser!"
 #define MY_AP_PASSWD         "LoserLoser"
 #else
@@ -35,6 +35,8 @@
 
 #define USR_AP_SSID          "TestForOTA"
 #define USR_AP_PASSWD        "12345678"
+
+#define MAX_CONN             4
 
 #define TFTP_SERVER_PORT     69
 #define WEB_SERVER_PORT      80
