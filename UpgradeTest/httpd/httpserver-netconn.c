@@ -92,11 +92,11 @@ static void http_server_serve(struct netconn *conn)
       there are other formats for GET, and we're keeping it very simple )*/
       if ((buflen >=5) && (strncmp(buf, "GET /", 5) == 0))
       {
-        /* Check if request to get ST.gif */ 
-        if (strncmp((char const *)buf,"GET /img/fluidicon.png", 22) == 0)
+        /* Check if request to get header.jpg */
+        if (strncmp((char const *)buf,"GET /img/header.png", 19) == 0)
         {
-          /* Check if request to get logo.jpg */
-          fs_open(&file, "/img/fluidicon.png");
+          /* Check if request to get header.png */
+          fs_open(&file, "/img/header.png");
           netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
           fs_close(&file);
         }
@@ -107,19 +107,19 @@ static void http_server_serve(struct netconn *conn)
           netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
           fs_close(&file);
         }
-        else 
+        else
         {
           /* Load Error page */
-          fs_open(&file, "/404.html"); 
+          fs_open(&file, "/404.html");
           netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
           fs_close(&file);
         }
-      }      
+      }
     }
   }
   /* Close the connection (server closes in HTTP) */
   netconn_close(conn);
-  
+
   /* Delete the buffer (netconn_recv gives us ownership,
    so we have to make sure to deallocate the buffer) */
   netbuf_delete(inbuf);
