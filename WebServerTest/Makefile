@@ -141,5 +141,5 @@ sinclude $(SDK_PATH)/Makefile
 FORCE:
 
 upload: | $(BIN_PATH)
-	@esptool.py --port /dev/ttyUSB0 write_flash -ff 80m -fm dio -fs 4m 0x00000 $(BIN_PATH)/eagle.flash.bin 0x20000 $(BIN_PATH)/eagle.irom0text.bin
+	@esptool.py --port /dev/ttyUSB0 write_flash -ff 80m -fm dio -fs 4MB 0x00000 $(BIN_PATH)/eagle.flash.bin 0x20000 $(BIN_PATH)/eagle.irom0text.bin
 
