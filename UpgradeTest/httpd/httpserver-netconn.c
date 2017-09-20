@@ -49,7 +49,6 @@
 #include "lwip/opt.h"
 #include "lwip/arch.h"
 #include "lwip/api.h"
-#include "fs.h"
 #include "string.h"
 #include <stdio.h>
 #include "httpserver-netconn.h"
@@ -85,7 +84,6 @@ static void http_server_serve(struct netconn *conn)
   err_t recv_err;
   char* buf;
   u16_t buflen;
-  struct fs_file file;
   uint32_t file_len;
   uint32_t total_wr;
   
@@ -106,6 +104,7 @@ static void http_server_serve(struct netconn *conn)
         /* Check if request to get header.jpg */
         if (strncmp((char const *)buf,"GET /img/header.png", 19) == 0)
         {
+        	/* Check if request to get header.png */
         	data_buffer = (uint8_t *)zalloc(DATA_BUFF_LEN);
 			file_len = DATA_BUFF_LEN;
 			total_wr = 0;
@@ -116,13 +115,10 @@ static void http_server_serve(struct netconn *conn)
 				total_wr += file_len;
 			}
 			free(data_buffer);
-//          /* Check if request to get header.png */
-//          fs_open(&file, "/img/header.png");
-//          netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
-//          fs_close(&file);
         }
         else if((strncmp(buf, "GET /index.html", 15) == 0)||(strncmp(buf, "GET / ", 6) == 0))
         {
+        	/* Load index page */
         	data_buffer = (uint8_t *)zalloc(DATA_BUFF_LEN);
         	file_len = DATA_BUFF_LEN;
         	total_wr = 0;
@@ -133,13 +129,10 @@ static void http_server_serve(struct netconn *conn)
         		total_wr += file_len;
         	}
         	free(data_buffer);
-//          /* Load index page */
-//          fs_open(&file, "/index.html");
-//          netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
-//          fs_close(&file);
         }
         else
         {
+        	/* Load Error page */
         	data_buffer = (uint8_t *)zalloc(DATA_BUFF_LEN);
 			file_len = DATA_BUFF_LEN;
 			total_wr = 0;
@@ -150,10 +143,6 @@ static void http_server_serve(struct netconn *conn)
 				total_wr += file_len;
 			}
 			free(data_buffer);
-//          /* Load Error page */
-//          fs_open(&file, "/404.html");
-//          netconn_write(conn, (const unsigned char*)(file.data), (size_t)file.len, NETCONN_NOCOPY);
-//          fs_close(&file);
         }
       }
     }
