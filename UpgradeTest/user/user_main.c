@@ -143,6 +143,30 @@ LOCAL void uart0_rx_intr_handler(void *para)
     }
 }
 
+void TaskStart(void *p)
+{
+	struct softap_config *apconfig = (struct softap_config *)zalloc(sizeof(struct softap_config)); //initialization.
+	wifi_softap_get_config(apconfig);
+	sprintf(apconfig->ssid, USR_AP_SSID);
+	sprintf(apconfig->password, USR_AP_PASSWD);
+	apconfig->authmode = AUTH_WPA_WPA2_PSK;
+	apconfig->ssid_len = 0;
+	apconfig->max_connection = MAX_CONN;
+	wifi_softap_set_config(apconfig);
+	free(apconfig);
+
+	struct station_config *stconfig = (struct station_config *)zalloc(sizeof(struct station_config));
+	sprintf(stconfig->ssid, MY_AP_SSID);
+	sprintf(stconfig->password, MY_AP_PASSWD);
+	wifi_station_set_config(stconfig);
+	free(stconfig);
+
+	tftpd_init();
+	http_server_netconn_init();
+
+	vTaskDelete(NULL);
+}
+
 /******************************************************************************
  * FunctionName : user_init
  * Description  : entry of user application, init user function here
@@ -154,27 +178,11 @@ void user_init(void)
 	/* station + softAP mode */
 	wifi_set_opmode(STATIONAP_MODE);
 
-	struct softap_config *apconfig = (struct softap_config *)zalloc(sizeof(struct softap_config)); //initialization.
-	wifi_softap_get_config(apconfig);
-	sprintf(apconfig->ssid, USR_AP_SSID);
-	sprintf(apconfig->password, USR_AP_PASSWD);
-	apconfig->authmode = AUTH_WPA_WPA2_PSK;
-	apconfig->ssid_len = 0;
-	apconfig->max_connection = 4;
-	wifi_softap_set_config(apconfig);
-	free(apconfig);
-
-	struct station_config *stconfig = (struct station_config *)zalloc(sizeof(struct station_config));
-	sprintf(stconfig->ssid, MY_AP_SSID);
-	sprintf(stconfig->password, MY_AP_PASSWD);
-	wifi_station_set_config(stconfig);
-	free(stconfig);
-
 	uart_init_new();
 	UART_intr_handler_register(uart0_rx_intr_handler, NULL);
 	ETS_UART_INTR_ENABLE();
-	tftpd_init();
-    http_server_netconn_init();
 
-    printf("Version Identifier: V0.0.4\n");
+	xTaskCreate(TaskStart, "startTask", 512, NULL, 5, NULL);
+
+    printf("Version Identifier: V0.0.5\n");
 }
