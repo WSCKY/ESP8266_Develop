@@ -60,11 +60,11 @@
 #define WEBSERVER_THREAD_PRIO    2
 #define DATA_BUFF_LEN            512
 
-#define _HTML_INDEX_LEN          595
+#define _HTML_INDEX_LEN          607
 #define _HTML_INDEX_ADDR         0x81000
 #define _HTML_404_LEN            509
 #define _HTML_404_ADDR           0x82000
-#define _HTML_PNG_LEN            311230
+#define _HTML_PNG_LEN            54867
 #define _HTML_PNG_ADDR           0x83000
 
 /* Private macro -------------------------------------------------------------*/
