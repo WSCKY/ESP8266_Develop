@@ -17,6 +17,16 @@ FLAVOR = debug
 
 #EXTRA_CCFLAGS += -u
 
+ifndef SDK_PATH
+SDK_PATH = $(shell pwd)/../ESP8266_RTOS_SDK
+export SDK_PATH
+endif
+
+ifndef BIN_PATH
+BIN_PATH = $(shell pwd)/../Binary
+export BIN_PATH
+endif
+
 ifndef PDIR # {
 GEN_IMAGES= eagle.app.v6.out
 GEN_BINS= eagle.app.v6.bin
@@ -125,6 +135,9 @@ DDEFINES +=				\
 INCLUDES := $(INCLUDES) -I $(PDIR)include
 sinclude $(SDK_PATH)/Makefile
 
-.PHONY: FORCE
+.PHONY: FORCE upload
 FORCE:
+
+upload: | $(BIN_PATH)
+	@esptool.py --port /dev/ttyUSB0 write_flash -ff 80m -fm dio -fs 2MB 0x00000 $(BIN_PATH)/eagle.flash.bin 0x20000 $(BIN_PATH)/eagle.irom0text.bin
 
