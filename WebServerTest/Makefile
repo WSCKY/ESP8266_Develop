@@ -140,6 +140,9 @@ sinclude $(SDK_PATH)/Makefile
 .PHONY: FORCE upload
 FORCE:
 
+loadparam: | $(BIN_PATH)
+	@esptool.py --port /dev/ttyUSB0 write_flash -ff 80m -fm dio --flash_size 2MB-c1 0x1FC000 $(BIN_PATH)/esp_init_data_default.bin 0x1FE000 $(BIN_PATH)/blank.bin
+
 upload: | $(BIN_PATH)
-	@esptool.py --port /dev/ttyUSB0 write_flash -ff 80m -fm dio -fs 4MB 0x00000 $(BIN_PATH)/eagle.flash.bin 0x20000 $(BIN_PATH)/eagle.irom0text.bin
+	@esptool.py --port /dev/ttyUSB0 write_flash -ff 80m -fm dio -fs 2MB 0x00000 $(BIN_PATH)/eagle.flash.bin 0x20000 $(BIN_PATH)/eagle.irom0text.bin
 
