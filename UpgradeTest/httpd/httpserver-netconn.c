@@ -101,6 +101,7 @@ static void http_server_serve(struct netconn *conn)
     
       /* Is this an HTTP GET command? (only check the first 5 chars, since
       there are other formats for GET, and we're keeping it very simple )*/
+      /* process HTTP GET requests */
       if ((buflen >=5) && (strncmp(buf, "GET /", 5) == 0))
       {
         /* Check if request to get header.jpg */
@@ -160,6 +161,27 @@ static void http_server_serve(struct netconn *conn)
 			}
 			free(data_buffer);
         }
+      }
+      /* process POST requests */
+      else if(strncmp(buf, "POST /", 6) == 0) {
+    	  if(strncmp((char const *)buf, "POST /kyChu/login.cgi", 21) == 0) {
+    		  printf("got login post.\n");
+    	  } else if(strncmp((char const *)buf, "POST /kyChu/print.cgi", 21) == 0) {
+    		  printf("got print post.\n");
+    	  } else {
+    		  printf("unknow post request.\n");
+    	  }
+    	  /* Load index page */
+    	  data_buffer = (uint8_t *)zalloc(DATA_BUFF_LEN);
+    	  file_len = DATA_BUFF_LEN;
+    	  total_wr = 0;
+    	  while(total_wr < _HTML_INDEX_LEN) {
+    		  if(_HTML_INDEX_LEN - total_wr < DATA_BUFF_LEN) file_len = _HTML_INDEX_LEN - total_wr;
+    		  	spi_flash_read(_HTML_INDEX_ADDR + total_wr, (uint32_t)data_buffer, file_len);
+				netconn_write(conn, (const unsigned char*)data_buffer, (size_t)file_len, NETCONN_NOCOPY);
+				total_wr += file_len;
+    	  }
+    	  free(data_buffer);
       }
     }
   }
