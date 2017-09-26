@@ -73,11 +73,12 @@
 /* Private variables ---------------------------------------------------------*/
 uint8_t *data_buffer;
 /* Private function prototypes -----------------------------------------------*/
+static void write_http_data(struct netconn *conn, uint32_t DataAddr, uint32_t DataLength);
 /* Private functions ---------------------------------------------------------*/
 
 /**
-  * @brief serve tcp connection  
-  * @param conn: pointer on connection structure 
+  * @brief serve tcp connection
+  * @param conn: pointer on connection structure
   * @retval None
   */
 static void http_server_serve(struct netconn *conn) 
@@ -93,73 +94,27 @@ static void http_server_serve(struct netconn *conn)
    We assume the request (the part we care about) is in one netbuf */
   recv_err = netconn_recv(conn, &inbuf);
   
-  if (recv_err == ERR_OK)
-  {
-    if (netconn_err(conn) == ERR_OK) 
-    {
+  if (recv_err == ERR_OK) {
+    if (netconn_err(conn) == ERR_OK) {
       netbuf_data(inbuf, (void**)&buf, &buflen);
     
       /* Is this an HTTP GET command? (only check the first 5 chars, since
       there are other formats for GET, and we're keeping it very simple )*/
       /* process HTTP GET requests */
-      if ((buflen >=5) && (strncmp(buf, "GET /", 5) == 0))
-      {
+      if ((buflen >=5) && (strncmp(buf, "GET /", 5) == 0)) {
         /* Check if request to get header.jpg */
-        if (strncmp((char const *)buf,"GET /img/header.png", 19) == 0)
-        {
+        if (strncmp((char const *)buf,"GET /img/header.png", 19) == 0) {
         	/* Check if request to get header.png */
-        	data_buffer = (uint8_t *)zalloc(DATA_BUFF_LEN);
-			file_len = DATA_BUFF_LEN;
-			total_wr = 0;
-			while(total_wr < _HTML_PNG_LEN) {
-				if(_HTML_PNG_LEN - total_wr < DATA_BUFF_LEN) file_len = _HTML_PNG_LEN - total_wr;
-				spi_flash_read(_HTML_PNG_ADDR + total_wr, (uint32_t)data_buffer, file_len);
-				netconn_write(conn, (const unsigned char*)data_buffer, (size_t)file_len, NETCONN_NOCOPY);
-				total_wr += file_len;
-			}
-			free(data_buffer);
-        }
-        else if((strncmp(buf, "GET /index.html", 15) == 0)||(strncmp(buf, "GET / ", 6) == 0))
-        {
+        	write_http_data(conn, _HTML_PNG_ADDR, _HTML_PNG_LEN);
+        } else if((strncmp(buf, "GET /index.html", 15) == 0)||(strncmp(buf, "GET / ", 6) == 0)) {
         	/* Load index page */
-        	data_buffer = (uint8_t *)zalloc(DATA_BUFF_LEN);
-        	file_len = DATA_BUFF_LEN;
-        	total_wr = 0;
-        	while(total_wr < _HTML_INDEX_LEN) {
-        		if(_HTML_INDEX_LEN - total_wr < DATA_BUFF_LEN) file_len = _HTML_INDEX_LEN - total_wr;
-        		spi_flash_read(_HTML_INDEX_ADDR + total_wr, (uint32_t)data_buffer, file_len);
-        		netconn_write(conn, (const unsigned char*)data_buffer, (size_t)file_len, NETCONN_NOCOPY);
-        		total_wr += file_len;
-        	}
-        	free(data_buffer);
-        }
-        else if(strncmp((char const *)buf,"GET /img/logo.ico", 17) == 0)
-        {
+        	write_http_data(conn, _HTML_INDEX_ADDR, _HTML_INDEX_LEN);
+        } else if(strncmp((char const *)buf,"GET /img/logo.ico", 17) == 0) {
         	/* Check if request to get logo.ico */
-			data_buffer = (uint8_t *)zalloc(DATA_BUFF_LEN);
-			file_len = DATA_BUFF_LEN;
-			total_wr = 0;
-			while(total_wr < _HTML_LOGO_LEN) {
-				if(_HTML_LOGO_LEN - total_wr < DATA_BUFF_LEN) file_len = _HTML_LOGO_LEN - total_wr;
-				spi_flash_read(_HTML_LOGO_ADDR + total_wr, (uint32_t)data_buffer, file_len);
-				netconn_write(conn, (const unsigned char*)data_buffer, (size_t)file_len, NETCONN_NOCOPY);
-				total_wr += file_len;
-			}
-			free(data_buffer);
-        }
-        else
-        {
-        	/* Load Error page */
-        	data_buffer = (uint8_t *)zalloc(DATA_BUFF_LEN);
-			file_len = DATA_BUFF_LEN;
-			total_wr = 0;
-			while(total_wr < _HTML_404_LEN) {
-				if(_HTML_404_LEN - total_wr < DATA_BUFF_LEN) file_len = _HTML_404_LEN - total_wr;
-				spi_flash_read(_HTML_404_ADDR + total_wr, (uint32_t)data_buffer, file_len);
-				netconn_write(conn, (const unsigned char*)data_buffer, (size_t)file_len, NETCONN_NOCOPY);
-				total_wr += file_len;
-			}
-			free(data_buffer);
+        	write_http_data(conn, _HTML_LOGO_ADDR, _HTML_LOGO_LEN);
+        } else {
+        	/* Load 404 page */
+        	write_http_data(conn, _HTML_404_ADDR, _HTML_404_LEN);
         }
       }
       /* process POST requests */
@@ -178,16 +133,7 @@ static void http_server_serve(struct netconn *conn)
     		  printf("unknow post request.\n");
     	  }
     	  /* Load index page */
-    	  data_buffer = (uint8_t *)zalloc(DATA_BUFF_LEN);
-    	  file_len = DATA_BUFF_LEN;
-    	  total_wr = 0;
-    	  while(total_wr < _HTML_INDEX_LEN) {
-    		  if(_HTML_INDEX_LEN - total_wr < DATA_BUFF_LEN) file_len = _HTML_INDEX_LEN - total_wr;
-    		  	spi_flash_read(_HTML_INDEX_ADDR + total_wr, (uint32_t)data_buffer, file_len);
-				netconn_write(conn, (const unsigned char*)data_buffer, (size_t)file_len, NETCONN_NOCOPY);
-				total_wr += file_len;
-    	  }
-    	  free(data_buffer);
+    	  write_http_data(conn, _HTML_INDEX_ADDR, _HTML_INDEX_LEN);
       }
     }
   }
@@ -199,6 +145,30 @@ static void http_server_serve(struct netconn *conn)
   netbuf_delete(inbuf);
 }
 
+/**
+  * @brief  send server data to http client.
+  * @param  conn: pointer on connection structure.
+  * @param  DataAddr: address in flash where store the web data.
+  * @param  DataLength: the length of web data.
+  * @retval None
+  */
+static void write_http_data(struct netconn *conn, uint32_t DataAddr, uint32_t DataLength)
+{
+	uint32_t file_len;
+	uint32_t total_wr;
+
+	/* Load index page */
+	data_buffer = (uint8_t *)zalloc(DATA_BUFF_LEN);
+	file_len = DATA_BUFF_LEN;
+	total_wr = 0;
+	while(total_wr < DataLength) {
+	  if(DataLength - total_wr < DATA_BUFF_LEN) file_len = DataLength - total_wr;
+		spi_flash_read(DataAddr + total_wr, (uint32_t)data_buffer, file_len);
+		netconn_write(conn, (const unsigned char*)data_buffer, (size_t)file_len, NETCONN_NOCOPY);
+		total_wr += file_len;
+	}
+	free(data_buffer);
+}
 
 /**
   * @brief  http server thread 
