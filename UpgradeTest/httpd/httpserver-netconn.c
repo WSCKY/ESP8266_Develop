@@ -121,19 +121,18 @@ static void http_server_serve(struct netconn *conn)
       else if(strncmp(buf, "POST /", 6) == 0) {
     	  if(strncmp((char const *)buf, "POST /kyChu/login.cgi", 21) == 0) {
     		  printf("got login post.\n");
+    		  /* Load index page */
+    		  write_http_data(conn, _HTML_INDEX_ADDR, _HTML_INDEX_LEN);
     	  } else if(strncmp((char const *)buf, "POST /kyChu/print.cgi", 21) == 0) {
-//    		  printf("got print post.\n");
-//    		  printf("post: %s", buf);
     		  for(file_len = buflen - 10; file_len > 0; file_len --) {
     			  if(strncmp((char *)(buf + file_len), "comment=", 8) == 0) {
     				  printf("Print: %s.\n", (char *)(buf + file_len + 8));
+    				  break;
     			  }
     		  }
-    	  } else {
-    		  printf("unknow post request.\n");
+    		  /* Load index page */
+    		  write_http_data(conn, _HTML_INDEX_ADDR, _HTML_INDEX_LEN);
     	  }
-    	  /* Load index page */
-    	  write_http_data(conn, _HTML_INDEX_ADDR, _HTML_INDEX_LEN);
       }
     }
   }
