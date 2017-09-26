@@ -144,7 +144,7 @@ DDEFINES +=				\
 INCLUDES := $(INCLUDES) -I $(PDIR)include
 sinclude $(SDK_PATH)/Makefile
 
-.PHONY: FORCE upload loadboot loadparam
+.PHONY: FORCE upload loadboot loadparam loadres
 FORCE:
 
 loadboot: | $(BIN_PATH)
@@ -167,4 +167,7 @@ else
         endif
     endif
 endif
+
+loadres:
+	@esptool.py --port /dev/ttyUSB0 write_flash -ff 80m -fm dio --flash_size 2MB-c1 0x81000 ./html/fs/index.html 0x82000 ./html/fs/404.html 0x83000 ./html/fs/img/header.png
 
