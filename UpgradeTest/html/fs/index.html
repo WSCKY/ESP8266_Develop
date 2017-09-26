@@ -1,20 +1,40 @@
 <html>
-<head><title>ESP8266_WebServer</title></head>
-<body bgcolor="white" text="red">
-
+<head><title>WSCKY_WebServer</title></head>
+<body bgcolor="white" >
     <table width="100%">
       <tr valign="top"><td width="150" height="150">
 	  <a href="https://github.com/WSCKY/"><img src="/img/header.png"
 	  border="0" alt="WSCKY logo" title="WSCKY"></a>
 	</td><td width="800">	  
-	  <h1>ESP8266 WebServer</h1>
+	  <h1>kyChu WebServer</h1>
 	  <p>
-	    The web page you are watching was served by a simple web server running on ESP8266 wifi module.
-            Source Code is <a href="https://github.com/WSCKY/ESP8266_Develop/">here</a>.
+	    The web page you are watching was served by a simple web server running on ESP8266 wifi module.<br />
+        You can get the Source Code from <a href="https://github.com/WSCKY/ESP8266_Develop/">my github</a>.
 	  </p>
-	</td><td>
-	  &nbsp;
-	</td></tr>
-      </table>
+	 <form action="/kyChu/login.cgi">
+	  <fieldset>
+	   <legend>Login:</legend>
+	   username: <input type="text" name="user" align="right" /><br />
+	   password: <input type="password" name="password" align="right" /><br /><br />
+	   <input type="submit" value="Submit">
+	  </fieldset>
+	 </form>
+	 <form action="MAILTO:kychu@qq.com" method="post" enctype="text/plain">
+	  <fieldset>
+	   <legend>eamil:</legend>
+	   name: <input type="text" name="name" size="20" /><br />
+	   email: <input type="text" name="mail" size="20" /><br />
+	   comment: <input type="text" name="comment" size="20" /><br /><br />
+	   <input type="submit" value="send" /> <input type="reset" value="reset" />
+	  </fieldset>
+	 </form>
+	 <form action="/kyChu/print.cgi" method="post">
+	  <fieldset>
+	   <legend>print:</legend>
+	   comment: <input type="text" name="comment" size="30" />
+	   <input type="submit" name="submit" value="submit" />
+	  </fieldset>
+	 </form>
+    </table>
 </body>
 </html>
