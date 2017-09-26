@@ -144,7 +144,7 @@ DDEFINES +=				\
 INCLUDES := $(INCLUDES) -I $(PDIR)include
 sinclude $(SDK_PATH)/Makefile
 
-.PHONY: FORCE upload loadboot loadparam
+.PHONY: FORCE upload loadboot loadparam loadres
 FORCE:
 
 loadboot: | $(BIN_PATH)
