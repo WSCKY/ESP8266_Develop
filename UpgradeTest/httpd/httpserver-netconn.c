@@ -60,12 +60,14 @@
 #define WEBSERVER_THREAD_PRIO    2
 #define DATA_BUFF_LEN            512
 
-#define _HTML_INDEX_LEN          1796
+#define _HTML_INDEX_LEN          1872
 #define _HTML_INDEX_ADDR         0x81000
 #define _HTML_404_LEN            770
 #define _HTML_404_ADDR           0x82000
+#define _HTML_LOGO_LEN           4030
+#define _HTML_LOGO_ADDR          0x83000
 #define _HTML_PNG_LEN            54867
-#define _HTML_PNG_ADDR           0x83000
+#define _HTML_PNG_ADDR           0x84000
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -129,6 +131,20 @@ static void http_server_serve(struct netconn *conn)
         		total_wr += file_len;
         	}
         	free(data_buffer);
+        }
+        else if(strncmp((char const *)buf,"GET /img/logo.ico", 17) == 0)
+        {
+        	/* Check if request to get logo.ico */
+			data_buffer = (uint8_t *)zalloc(DATA_BUFF_LEN);
+			file_len = DATA_BUFF_LEN;
+			total_wr = 0;
+			while(total_wr < _HTML_LOGO_LEN) {
+				if(_HTML_LOGO_LEN - total_wr < DATA_BUFF_LEN) file_len = _HTML_LOGO_LEN - total_wr;
+				spi_flash_read(_HTML_LOGO_ADDR + total_wr, (uint32_t)data_buffer, file_len);
+				netconn_write(conn, (const unsigned char*)data_buffer, (size_t)file_len, NETCONN_NOCOPY);
+				total_wr += file_len;
+			}
+			free(data_buffer);
         }
         else
         {
