@@ -213,43 +213,42 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
         }
       }
       /* process POST requests */
-      else if(strncmp(data, "POST /", 6) == 0) {
-    	if(strncmp((char const *)data, "POST /kyChu/login.cgi", 21) == 0) {
-    		/* Load upgrade page */
-    		hs->file = (char *)_HTML_UPLOAD_ADDR;
-			hs->left = _HTML_UPLOAD_LEN;
-			pbuf_free(p);
-			/* Tell TCP that we wish be to informed of data that has been
-			   successfully sent by a call to the http_sent() function. */
-			tcp_sent(pcb, http_sent);
-    	} else if(strncmp((char const *)data, "POST /kyChu/print.cgi", 21) == 0) {
-    		  for(i = len - 10; i > 0; i --) {
-    			  if(strncmp((char *)(data + i), "comment=", 8) == 0) {
-    				  printf("Print: %s.\n", (char *)(data + i + 8));
-    				  break;
-    			  }
-    		  }
-    		/* Load index page */
-    		hs->file = (char *)_HTML_INDEX_ADDR;
-    		hs->left = _HTML_INDEX_LEN;
-			pbuf_free(p);
-			/* Tell TCP that we wish be to informed of data that has been
-			   successfully sent by a call to the http_sent() function. */
-			tcp_sent(pcb, http_sent);
-    	  } else if(strncmp((char const *)data, "POST /upgrade/wifi.cgi", 22) == 0) {
-    		  if(RecPostDataFlag == 0) {
-    			  /* parse packet for Content-length field */
-    			  ContentSize = Parse_Content_Length(data, len);
-    			  printf("content size: %d.\n", ContentSize);
-    			  uint32_t DataOffset = 0;
-    			  /* parse packet for the octet-stream field */
-    			  for (i = 0; i < len; i ++) {
-    				  if (strncmp((char *)(data + i), octet_stream, 13)==0) {
-    					  DataOffset = i+16;
-    			          break;
-    				  }
-    			  }
-    			  RecPostDataFlag = 1;
+      else if(strncmp((char const *)data, "POST /kyChu/login.cgi", 21) == 0) {
+    	/* Load upgrade page */
+		hs->file = (char *)_HTML_UPLOAD_ADDR;
+		hs->left = _HTML_UPLOAD_LEN;
+		pbuf_free(p);
+		/* Tell TCP that we wish be to informed of data that has been
+		   successfully sent by a call to the http_sent() function. */
+		tcp_sent(pcb, http_sent);
+      } else if(strncmp((char const *)data, "POST /kyChu/print.cgi", 21) == 0) {
+    	for(i = len - 10; i > 0; i --) {
+    	  if(strncmp((char *)(data + i), "comment=", 8) == 0) {
+    		printf("Print: %s.\n", (char *)(data + i + 8));
+    		break;
+    	  }
+    	}
+		/* Load index page */
+		hs->file = (char *)_HTML_INDEX_ADDR;
+		hs->left = _HTML_INDEX_LEN;
+		pbuf_free(p);
+		/* Tell TCP that we wish be to informed of data that has been
+		   successfully sent by a call to the http_sent() function. */
+		tcp_sent(pcb, http_sent);
+      } else if(strncmp((char const *)data, "POST /upgrade/wifi.cgi", 22) == 0) {
+    	if(RecPostDataFlag == 0) {
+    	  /* parse packet for Content-length field */
+    	  ContentSize = Parse_Content_Length(data, len);
+    	  printf("content size: %d.\n", ContentSize);
+    	  uint32_t DataOffset = 0;
+    	  /* parse packet for the octet-stream field */
+    	  for (i = 0; i < len; i ++) {
+			if (strncmp((char *)(data + i), octet_stream, 13)==0) {
+			  DataOffset = i+16;
+			  break;
+			}
+    	  }
+    	  RecPostDataFlag = 1;
 //    			            /* case of MSIE8 : we do not receive data in the POST packet*/
 //    			            if (DataOffset==0)
 //    			            {
