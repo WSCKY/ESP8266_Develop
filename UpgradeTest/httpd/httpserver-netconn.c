@@ -62,12 +62,14 @@
 
 #define _HTML_INDEX_LEN          1872
 #define _HTML_INDEX_ADDR         0x81000
-#define _HTML_404_LEN            770
+#define _HTML_404_LEN            785
 #define _HTML_404_ADDR           0x82000
 #define _HTML_LOGO_LEN           4030
 #define _HTML_LOGO_ADDR          0x83000
+#define _HTML_UPLOAD_LEN         1540
+#define _HTML_UPLOAD_ADDR        0x84000
 #define _HTML_PNG_LEN            54867
-#define _HTML_PNG_ADDR           0x84000
+#define _HTML_PNG_ADDR           0x85000
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -121,8 +123,8 @@ static void http_server_serve(struct netconn *conn)
       else if(strncmp(buf, "POST /", 6) == 0) {
     	  if(strncmp((char const *)buf, "POST /kyChu/login.cgi", 21) == 0) {
     		  printf("got login post.\n");
-    		  /* Load index page */
-    		  write_http_data(conn, _HTML_INDEX_ADDR, _HTML_INDEX_LEN);
+    		  /* Load upgrade page */
+    		  write_http_data(conn, _HTML_UPLOAD_ADDR, _HTML_UPLOAD_LEN);
     	  } else if(strncmp((char const *)buf, "POST /kyChu/print.cgi", 21) == 0) {
     		  for(file_len = buflen - 10; file_len > 0; file_len --) {
     			  if(strncmp((char *)(buf + file_len), "comment=", 8) == 0) {
@@ -132,6 +134,14 @@ static void http_server_serve(struct netconn *conn)
     		  }
     		  /* Load index page */
     		  write_http_data(conn, _HTML_INDEX_ADDR, _HTML_INDEX_LEN);
+    	  } else if(strncmp((char const *)buf, "POST /upgrade/wifi.cgi", 22) == 0) {
+    		  printf("wifi: %s", buf);
+    		  /* Load index page */
+    		  write_http_data(conn, _HTML_INDEX_ADDR, _HTML_INDEX_LEN);
+    	  } else if(strncmp((char const *)buf, "POST /upgrade/fc.cgi", 20) == 0) {
+    		  printf("fc: %s", buf);
+			  /* Load index page */
+			  write_http_data(conn, _HTML_INDEX_ADDR, _HTML_INDEX_LEN);
     	  }
       }
     }
