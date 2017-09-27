@@ -66,7 +66,7 @@
 #define _HTML_404_ADDR           0x82000
 #define _HTML_LOGO_LEN           4030
 #define _HTML_LOGO_ADDR          0x83000
-#define _HTML_UPLOAD_LEN         1540
+#define _HTML_UPLOAD_LEN         1542
 #define _HTML_UPLOAD_ADDR        0x84000
 #define _HTML_PNG_LEN            54867
 #define _HTML_PNG_ADDR           0x85000
