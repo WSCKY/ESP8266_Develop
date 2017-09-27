@@ -1,47 +1,10 @@
 /**
   ******************************************************************************
-  * @file    LwIP/LwIP_HTTP_Server_Netconn_RTOS/Src/httpser-netconn.c 
-  * @author  MCD Application Team
-  * @version V1.2.0
-  * @date    30-December-2016
-  * @brief   Basic http server implementation using LwIP netconn API  
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics International N.V. 
-  * All rights reserved.</center></h2>
-  *
-  * Redistribution and use in source and binary forms, with or without 
-  * modification, are permitted, provided that the following conditions are met:
-  *
-  * 1. Redistribution of source code must retain the above copyright notice, 
-  *    this list of conditions and the following disclaimer.
-  * 2. Redistributions in binary form must reproduce the above copyright notice,
-  *    this list of conditions and the following disclaimer in the documentation
-  *    and/or other materials provided with the distribution.
-  * 3. Neither the name of STMicroelectronics nor the names of other 
-  *    contributors to this software may be used to endorse or promote products 
-  *    derived from this software without specific written permission.
-  * 4. This software, including modifications and/or derivative works of this 
-  *    software, must execute solely and exclusively on microcontroller or
-  *    microprocessor devices manufactured by or for STMicroelectronics.
-  * 5. Redistribution and use of this software other than as permitted under 
-  *    this license is void and will automatically terminate your rights under 
-  *    this license. 
-  *
-  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS" 
-  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT 
-  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
-  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
-  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT 
-  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
-  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
-  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
+  * @file    httpd/httpser-netconn.c
+  * @author  kyChu
+  * @version V1.0.0
+  * @date    27-September-2017
+  * @brief   Basic http server implementation using LwIP netconn API
   ******************************************************************************
   */
 
@@ -58,14 +21,12 @@
 #include "lwip/lwip/tcp.h"
 
 /* Private typedef -----------------------------------------------------------*/
-struct http_state
-{
+struct http_state {
   char *file;
   u32_t left;
 };
 /* Private define ------------------------------------------------------------*/
 #define WEBSERVER_THREAD_PRIO    2
-//#define DATA_BUFF_LEN            512
 
 #define _HTML_INDEX_LEN          1872
 #define _HTML_INDEX_ADDR         0x81000
@@ -80,6 +41,8 @@ struct http_state
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+static struct tcp_pcb *pcb;
+
 static uint8_t RecPostDataFlag = 0;
 static uint32_t ContentLengthOffset = 0;
 static uint32_t ContentSize = 0;
@@ -91,7 +54,7 @@ static const char Content_Length[17] =
 /* Content Length */
 {0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x2d, 0x4c, 0x65, 0x6e, 0x67,0x74, 0x68, 0x3a, 0x20, };
 /* Private function prototypes -----------------------------------------------*/
-//static void write_http_data(struct tcp_pcb *pcb, uint32_t DataAddr, uint32_t DataLength);
+static uint32_t Parse_Content_Length(char *data, uint32_t len);
 /* Private functions ---------------------------------------------------------*/
 
 /**
@@ -160,12 +123,9 @@ static void send_data(struct tcp_pcb *pcb, struct http_state *hs)
   */
 static err_t http_poll(void *arg, struct tcp_pcb *pcb)
 {
-  if (arg == NULL)
-  {
+  if (arg == NULL) {
     tcp_close(pcb);
-  }
-  else
-  {
+  } else {
     send_data(pcb, (struct http_state *)arg);
   }
   return ERR_OK;
@@ -184,12 +144,9 @@ static err_t http_sent(void *arg, struct tcp_pcb *pcb, u16_t len)
 
   hs = arg;
 
-  if (hs->left > 0)
-  {
+  if (hs->left > 0) {
     send_data(pcb, hs);
-  }
-  else
-  {
+  } else {
     close_conn(pcb, hs);
   }
   return ERR_OK;
@@ -203,19 +160,12 @@ static err_t http_sent(void *arg, struct tcp_pcb *pcb, u16_t len)
 //static err_t http_server_serve(struct netconn *conn)
 static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t err)
 {
-//  struct netbuf *inbuf;
-//  err_t recv_err;
   char* data;
   int32_t len = 0;
+  uint32_t i = 0;
   struct http_state *hs;
-//  u16_t buflen;
-//  uint32_t file_len;
-//  uint32_t total_wr;
+
   hs = arg;
-  
-//  /* Read the data from the port, blocking if nothing yet there.
-//   We assume the request (the part we care about) is in one netbuf */
-//  recv_err = netconn_recv(conn, &inbuf);
 
   if (err == ERR_OK && p != NULL) {
 	/* Inform TCP that we have taken the data */
@@ -233,7 +183,6 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
         	hs->file = (char *)_HTML_PNG_ADDR;
         	hs->left = _HTML_PNG_LEN;
         	pbuf_free(p);
-//        	write_http_data(pcb, _HTML_PNG_ADDR, _HTML_PNG_LEN);
         	/* Tell TCP that we wish be to informed of data that has been
         	   successfully sent by a call to the http_sent() function. */
         	tcp_sent(pcb, http_sent);
@@ -245,7 +194,6 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
 			/* Tell TCP that we wish be to informed of data that has been
 			   successfully sent by a call to the http_sent() function. */
 			tcp_sent(pcb, http_sent);
-//        	write_http_data(pcb, _HTML_INDEX_ADDR, _HTML_INDEX_LEN);
         } else if(strncmp((char const *)data,"GET /img/logo.ico", 17) == 0) {
         	/* Load logo.ico */
         	hs->file = (char *)_HTML_LOGO_ADDR;
@@ -254,7 +202,6 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
 			/* Tell TCP that we wish be to informed of data that has been
 			   successfully sent by a call to the http_sent() function. */
 			tcp_sent(pcb, http_sent);
-//        	write_http_data(pcb, _HTML_LOGO_ADDR, _HTML_LOGO_LEN);
         } else {
         	/* Load 404 page */
         	hs->file = (char *)_HTML_404_ADDR;
@@ -263,13 +210,11 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
 			/* Tell TCP that we wish be to informed of data that has been
 			   successfully sent by a call to the http_sent() function. */
 			tcp_sent(pcb, http_sent);
-//        	write_http_data(pcb, _HTML_404_ADDR, _HTML_404_LEN);
         }
       }
       /* process POST requests */
       else if(strncmp(data, "POST /", 6) == 0) {
     	if(strncmp((char const *)data, "POST /kyChu/login.cgi", 21) == 0) {
-    		printf("got login post.\n");
     		/* Load upgrade page */
     		hs->file = (char *)_HTML_UPLOAD_ADDR;
 			hs->left = _HTML_UPLOAD_LEN;
@@ -277,14 +222,13 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
 			/* Tell TCP that we wish be to informed of data that has been
 			   successfully sent by a call to the http_sent() function. */
 			tcp_sent(pcb, http_sent);
-//    		  write_http_data(pcb, _HTML_UPLOAD_ADDR, _HTML_UPLOAD_LEN);
     	} else if(strncmp((char const *)data, "POST /kyChu/print.cgi", 21) == 0) {
-//    		  for(uint32_t i = len - 10; i > 0; i --) {
-//    			  if(strncmp((char *)(data + i), "comment=", 8) == 0) {
-//    				  printf("Print: %s.\n", (char *)(data + i + 8));
-//    				  break;
-//    			  }
-//    		  }
+    		  for(i = len - 10; i > 0; i --) {
+    			  if(strncmp((char *)(data + i), "comment=", 8) == 0) {
+    				  printf("Print: %s.\n", (char *)(data + i + 8));
+    				  break;
+    			  }
+    		  }
     		/* Load index page */
     		hs->file = (char *)_HTML_INDEX_ADDR;
     		hs->left = _HTML_INDEX_LEN;
@@ -292,23 +236,20 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
 			/* Tell TCP that we wish be to informed of data that has been
 			   successfully sent by a call to the http_sent() function. */
 			tcp_sent(pcb, http_sent);
-//    		  write_http_data(pcb, _HTML_INDEX_ADDR, _HTML_INDEX_LEN);
     	  } else if(strncmp((char const *)data, "POST /upgrade/wifi.cgi", 22) == 0) {
-//    		  printf("wifi: %s", buf);
-//    		  /* Load index page */
-//    		  write_http_data(pcb, _HTML_INDEX_ADDR, _HTML_INDEX_LEN);
     		  if(RecPostDataFlag == 0) {
-//    			  /* parse packet for Content-length field */
-//    			  ContentSize = Parse_Content_Length(data, len);
-//    			  printf("content size: %x.\n", ContentSize);
-//    			  uint32_t DataOffset = 0;
-//    			  /* parse packet for the octet-stream field */
-//    			  for (uint32_t i = 0; i < len; i ++) {
-//    				  if (strncmp((char *)(data + i), octet_stream, 13)==0) {
-//    					  DataOffset = i+16;
-//    			          break;
-//    				  }
-//    			  }
+    			  /* parse packet for Content-length field */
+    			  ContentSize = Parse_Content_Length(data, len);
+    			  printf("content size: %d.\n", ContentSize);
+    			  uint32_t DataOffset = 0;
+    			  /* parse packet for the octet-stream field */
+    			  for (i = 0; i < len; i ++) {
+    				  if (strncmp((char *)(data + i), octet_stream, 13)==0) {
+    					  DataOffset = i+16;
+    			          break;
+    				  }
+    			  }
+    			  RecPostDataFlag = 1;
 //    			            /* case of MSIE8 : we do not receive data in the POST packet*/
 //    			            if (DataOffset==0)
 //    			            {
@@ -324,53 +265,32 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
 //    			              TotalReceived = len - (ContentLengthOffset + 4);
 //    			            }
     		  }
+    		  /* Load index page */
+			  hs->file = (char *)_HTML_INDEX_ADDR;
+			  hs->left = _HTML_INDEX_LEN;
+			  pbuf_free(p);
+			  /* Tell TCP that we wish be to informed of data that has been
+				 successfully sent by a call to the http_sent() function. */
+			  tcp_sent(pcb, http_sent);
     	  } else if(strncmp((char const *)data, "POST /upgrade/fc.cgi", 20) == 0) {
     		  printf("fc: %s", data);
 			  /* Load index page */
-//			  write_http_data(pcb, _HTML_INDEX_ADDR, _HTML_INDEX_LEN);
+    		  hs->file = (char *)_HTML_INDEX_ADDR;
+    		  hs->left = _HTML_INDEX_LEN;
+    		  pbuf_free(p);
+              /* Tell TCP that we wish be to informed of data that has been
+                 successfully sent by a call to the http_sent() function. */
+    		  tcp_sent(pcb, http_sent);
     	  }
       }
     }
   }
-//  /* Close the connection (server closes in HTTP) */
-//  netconn_close(conn);
-//
-//  /* Delete the buffer (netconn_recv gives us ownership,
-//   so we have to make sure to deallocate the buffer) */
-//  netbuf_delete(inbuf);
   if(err == ERR_OK && p == NULL) {
 	  /* received empty frame */
       close_conn(pcb, hs);
   }
   return ERR_OK;
 }
-
-///**
-//  * @brief  send server data to http client.
-//  * @param  conn: pointer on connection structure.
-//  * @param  DataAddr: address in flash where store the web data.
-//  * @param  DataLength: the length of web data.
-//  * @retval None
-//  */
-//static void write_http_data(struct tcp_pcb *pcb, uint32_t DataAddr, uint32_t DataLength)
-//{
-//	uint32_t file_len;
-//	uint32_t total_wr;
-//	uint8_t *data_buffer;
-//
-//	/* Load index page */
-//	data_buffer = (uint8_t *)zalloc(DATA_BUFF_LEN);
-//	file_len = DATA_BUFF_LEN;
-//	total_wr = 0;
-//	while(total_wr < DataLength) {
-//	  if(DataLength - total_wr < DATA_BUFF_LEN) file_len = DataLength - total_wr;
-//		spi_flash_read(DataAddr + total_wr, (uint32_t)data_buffer, file_len);
-////		netconn_write(conn, (const unsigned char*)data_buffer, (size_t)file_len, NETCONN_NOCOPY);
-//		if(tcp_write(pcb, (const unsigned char*)data_buffer, (size_t)file_len) == ERR_OK)
-//			total_wr += file_len;
-//	}
-//	free(data_buffer);
-//}
 
 /**
   * @brief  Extract the Content_Length data from HTML data
@@ -449,7 +369,7 @@ static err_t http_accept(void *arg, struct tcp_pcb *pcb, err_t err)
   tcp_poll(pcb, http_poll, 10);
   return ERR_OK;
 }
-static struct tcp_pcb *pcb;
+
 /**
   * @brief  intialize HTTP webserver
   * @param arg: pointer on argument(not used here)
@@ -457,7 +377,6 @@ static struct tcp_pcb *pcb;
   */
 static void http_server_netconn_thread(void *arg)
 {
-
 	/*create new pcb*/
 	pcb = (struct tcp_pcb *)tcp_new();
 	/* bind HTTP traffic to pcb */
@@ -467,37 +386,6 @@ static void http_server_netconn_thread(void *arg)
 	/* define callback function for TCP connection setup */
 	tcp_accept(pcb, http_accept);
 	vTaskDelete(NULL);
-//  struct netconn *conn, *newconn;
-//  err_t err, accept_err;
-//
-//  /* Create a new TCP connection handle */
-//  conn = netconn_new(NETCONN_TCP);
-//
-//  if (conn!= NULL)
-//  {
-//    /* Bind to port 80 (HTTP) with default IP address */
-//    err = netconn_bind(conn, NULL, WEB_SERVER_PORT);
-//
-//    if (err == ERR_OK)
-//    {
-//      /* Put the connection into LISTEN state */
-//      netconn_listen(conn);
-//
-//      while(1)
-//      {
-//        /* accept any icoming connection */
-//        accept_err = netconn_accept(conn, &newconn);
-//        if(accept_err == ERR_OK)
-//        {
-//          /* serve connection */
-//          http_server_serve(newconn);
-//
-//          /* delete connection */
-//          netconn_delete(newconn);
-//        }
-//      }
-//    }
-//  }
 }
 
 /**
