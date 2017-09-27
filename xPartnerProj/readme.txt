@@ -32,7 +32,7 @@ Compile Options:
 
 (4) SPI_SIZE_MAP
     Possible value: 0/2/3/4/5/6
-    Default value: 6
+    Default value: 5
 
 For example:
-    make COMPILE=gcc BOOT=new APP=1 SPI_SPEED=80 SPI_MODE=DIO SPI_SIZE_MAP=6
+    make COMPILE=gcc BOOT=new APP=1 SPI_SPEED=80 SPI_MODE=DIO SPI_SIZE_MAP=5
