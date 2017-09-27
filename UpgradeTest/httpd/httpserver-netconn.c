@@ -73,7 +73,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-uint8_t *data_buffer;
+
 /* Private function prototypes -----------------------------------------------*/
 static void write_http_data(struct netconn *conn, uint32_t DataAddr, uint32_t DataLength);
 /* Private functions ---------------------------------------------------------*/
@@ -165,6 +165,7 @@ static void write_http_data(struct netconn *conn, uint32_t DataAddr, uint32_t Da
 {
 	uint32_t file_len;
 	uint32_t total_wr;
+	uint8_t *data_buffer;
 
 	/* Load index page */
 	data_buffer = (uint8_t *)zalloc(DATA_BUFF_LEN);
