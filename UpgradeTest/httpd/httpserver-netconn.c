@@ -56,6 +56,11 @@ static const char http_crnl_2[4] =
 static const char octet_stream[14] =
 /* "octet-stream" */
 {0x6f, 0x63, 0x74, 0x65, 0x74, 0x2d, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d,0x0d, };
+static const char Content_Type[15] =
+"Content-Type: ";
+//static const char crnl_2[4] =
+///* \r\n\r\n */
+//{0xd, 0xa, 0xd, 0xa};
 static const char Content_Length[17] =
 /* Content Length */
 {0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x2d, 0x4c, 0x65, 0x6e, 0x67,0x74, 0x68, 0x3a, 0x20, };
@@ -163,7 +168,6 @@ static err_t http_sent(void *arg, struct tcp_pcb *pcb, u16_t len)
   * @param conn: pointer on connection structure
   * @retval None
   */
-//static err_t http_server_serve(struct netconn *conn)
 static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t err)
 {
   char* data;
@@ -265,7 +269,7 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
 		  if (DataOffset == 0) {
 			  RecPostDataFlag ++;
 			  BrowserFlag = 1;
-			  printf("dbg1: %s", (char *)data);
+//			  printf("dbg1: %s", (char *)data);
 			  pbuf_free(p);
 			  return ERR_OK;
 		  } else {/* case of Mozilla Firefox : we receive data in the POST packet*/
@@ -279,14 +283,18 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
     		} else if((RecPostDataFlag == 1) && (BrowserFlag == 1)) {
     			/* parse packet for the octet-stream field */
     			for (i = 0; i < len; i ++) {
-    				if(strncmp((char *)(data + i), octet_stream, 13) == 0) {
-    					DataOffset = i + 16;
+    				if(strncmp((char *)(data + i), Content_Type, 14) == 0) {
+    					DataOffset = i + 14;
     					break;
     				}
     			}
+    			do {
+    				DataOffset ++;
+    			} while(strncmp((char *)(data + DataOffset), "\r\n\r\n", 4));
+    			DataOffset += 4;
     			TotalReceived += len;
     			RecPostDataFlag ++;
-//    			printf("octet: %s.\n", octet_stream);
+//    			printf("first char: %c.\n", *(char *)(data + DataOffset));
     			printf("dataoff: %d.\n", DataOffset);
 //    			printf("dbg2: %s", (char *)data);
     		}
@@ -343,7 +351,8 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
 
     		/* write data in Flash */
 //    		if (len) IAP_HTTP_writedata(ptr, len);
-    		printf("end: %s...", (char *)ptr);
+//    		printf("end: %s...", (char *)ptr);
+    		printf("end char: %c.\n", *(char *)(ptr + len -1));
     		RecPostDataFlag = 0;
     		printf("%d bytes received.\n", TotalData);
     		/* Load index page */
@@ -357,7 +366,7 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
     		/* not last data packet */
     		/* write data in flash */
 //    		if(len) IAP_HTTP_writedata(ptr, len);
-    		printf("fd: %s", (char *)ptr);
+//    		printf("fd: %s", (char *)ptr);
     	}
     	pbuf_free(p);
       } else if(strncmp((char const *)data, "POST /upgrade/fc.cgi", 20) == 0) {
