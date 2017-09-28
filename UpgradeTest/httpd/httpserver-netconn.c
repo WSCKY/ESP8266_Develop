@@ -256,7 +256,7 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
     	  TotalReceived = 0;
     	  /* parse packet for Content-length field */
     	  ContentSize = Parse_Content_Length(data, len);
-    	  printf("content size: %d.\n", ContentSize);
+//    	  printf("content size: %d.\n", ContentSize);
 
     	  /* parse packet for the octet-stream field */
     	  for (i = 0; i < len; i ++) {
@@ -295,7 +295,7 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
     			TotalReceived += len;
     			RecPostDataFlag ++;
 //    			printf("first char: %c.\n", *(char *)(data + DataOffset));
-    			printf("dataoff: %d.\n", DataOffset);
+//    			printf("dataoff: %d.\n", DataOffset);
 //    			printf("dbg2: %s", (char *)data);
     		}
     		/* parse packet for the filename field */
@@ -328,7 +328,7 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
     		}
     		TotalData = 0;
     		/* -------- */
-    		printf("Start Receive data ...\n");
+//    		printf("Start Receive data ...\n");
     	} else {
     		/* DataFlag >1 => the packet is data only */
     		TotalReceived += len;
@@ -352,7 +352,7 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
     		/* write data in Flash */
 //    		if (len) IAP_HTTP_writedata(ptr, len);
 //    		printf("end: %s...", (char *)ptr);
-    		printf("end char: %c.\n", *(char *)(ptr + len -1));
+//    		printf("end char: %c.\n", *(char *)(ptr + len -1));
     		RecPostDataFlag = 0;
     		printf("%d bytes received.\n", TotalData);
     		/* Load index page */
