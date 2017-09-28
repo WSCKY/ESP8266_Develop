@@ -44,9 +44,15 @@ struct http_state {
 static struct tcp_pcb *pcb;
 
 static uint8_t RecPostDataFlag = 0;
+static uint8_t BrowserFlag = 0;
 static uint32_t ContentLengthOffset = 0;
 static uint32_t ContentSize = 0;
+static uint32_t TotalReceived = 0;
+static uint32_t TotalData = 0;
 
+static const char http_crnl_2[4] =
+/* "\r\n--" */
+{0xd, 0xa,0x2d,0x2d};
 static const char octet_stream[14] =
 /* "octet-stream" */
 {0x6f, 0x63, 0x74, 0x65, 0x74, 0x2d, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d,0x0d, };
@@ -163,6 +169,10 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
   char* data;
   int32_t len = 0;
   uint32_t i = 0;
+  char filename[35];
+  char *ptr;
+  uint32_t DataOffset = 0, FilenameOffset = 0;
+
   struct http_state *hs;
 
   hs = arg;
@@ -235,54 +245,131 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
 		/* Tell TCP that we wish be to informed of data that has been
 		   successfully sent by a call to the http_sent() function. */
 		tcp_sent(pcb, http_sent);
-      } else if(strncmp((char const *)data, "POST /upgrade/wifi.cgi", 22) == 0) {
+      } else if((strncmp((char const *)data, "POST /upgrade/wifi.cgi", 22) == 0) || RecPostDataFlag >= 1) {
+    	DataOffset = 0;
     	if(RecPostDataFlag == 0) {
+    	  BrowserFlag = 0;
+    	  TotalReceived = 0;
     	  /* parse packet for Content-length field */
     	  ContentSize = Parse_Content_Length(data, len);
     	  printf("content size: %d.\n", ContentSize);
-    	  uint32_t DataOffset = 0;
+
     	  /* parse packet for the octet-stream field */
     	  for (i = 0; i < len; i ++) {
-			if (strncmp((char *)(data + i), octet_stream, 13)==0) {
-			  DataOffset = i+16;
+			if (strncmp((char *)(data + i), octet_stream, 13) == 0) {
+			  DataOffset = i + 16;
 			  break;
 			}
     	  }
-    	  RecPostDataFlag = 1;
-//    			            /* case of MSIE8 : we do not receive data in the POST packet*/
-//    			            if (DataOffset==0)
-//    			            {
-//    			               DataFlag++;
-//    			               BrowserFlag = 1;
-//    			               pbuf_free(p);
-//    			               return ERR_OK;
-//
-//    			            }
-//    			            /* case of Mozilla Firefox : we receive data in the POST packet*/
-//    			            else
-//    			            {
-//    			              TotalReceived = len - (ContentLengthOffset + 4);
-//    			            }
-    		  }
-    		  /* Load index page */
-			  hs->file = (char *)_HTML_INDEX_ADDR;
-			  hs->left = _HTML_INDEX_LEN;
+		  /* case of MSIE8 : we do not receive data in the POST packet*/
+		  if (DataOffset == 0) {
+			  RecPostDataFlag ++;
+			  BrowserFlag = 1;
 			  pbuf_free(p);
-			  /* Tell TCP that we wish be to informed of data that has been
-				 successfully sent by a call to the http_sent() function. */
-			  tcp_sent(pcb, http_sent);
-    	  } else if(strncmp((char const *)data, "POST /upgrade/fc.cgi", 20) == 0) {
-    		  printf("fc: %s", data);
-			  /* Load index page */
-    		  hs->file = (char *)_HTML_INDEX_ADDR;
-    		  hs->left = _HTML_INDEX_LEN;
-    		  pbuf_free(p);
-              /* Tell TCP that we wish be to informed of data that has been
-                 successfully sent by a call to the http_sent() function. */
-    		  tcp_sent(pcb, http_sent);
-    	  }
+			  return ERR_OK;
+		  } else {/* case of Mozilla Firefox : we receive data in the POST packet*/
+			  TotalReceived = len - (ContentLengthOffset + 4);
+		  }
+		}
+    	if (((RecPostDataFlag == 1) && (BrowserFlag == 1)) || ((RecPostDataFlag == 0) && (BrowserFlag == 0))) {
+    		if ((RecPostDataFlag == 0) && (BrowserFlag == 0)) {
+    			RecPostDataFlag ++;
+    		} else if((RecPostDataFlag == 1) && (BrowserFlag == 1)) {
+    			/* parse packet for the octet-stream field */
+    			for (i = 0; i < len; i ++) {
+    				if(strncmp((char *)(data + i), octet_stream, 13) == 0) {
+    					DataOffset = i + 16;
+    					break;
+    				}
+    			}
+    			TotalReceived += len;
+    			RecPostDataFlag ++;
+    		}
+    		/* parse packet for the filename field */
+    		FilenameOffset = 0;
+    		for(i = 0; i < len; i ++) {
+    			if(strncmp((char *)(data + i), "filename=", 9) == 0) {
+    				FilenameOffset = i + 10;
+    				break;
+    			}
+    		}
+    		i = 0;
+    		if(FilenameOffset) {
+    			while((*(data + FilenameOffset + i) != 0x22) && (i < 35)) {
+    				filename[i] = *(data + FilenameOffset + i);
+    				i ++;
+    			}
+    			filename[i] = 0x0;
+    			printf("filename: %s \n", filename);
+    		}
+    		if(i == 0) {
+				/* Load index page */
+				hs->file = (char *)_HTML_INDEX_ADDR;
+				hs->left = _HTML_INDEX_LEN;
+				pbuf_free(p);
+				/* Tell TCP that we wish be to informed of data that has been
+				   successfully sent by a call to the http_sent() function. */
+				tcp_sent(pcb, http_sent);
+				RecPostDataFlag = 0;
+    		    return ERR_OK;
+    		}
+    		TotalData = 0;
+    		/* -------- */
+    		printf("Start Receive data ...\n");
+    	} else {
+    		/* DataFlag >1 => the packet is data only */
+    		TotalReceived += len;
+    	}
+
+    	ptr = (char *)(data + DataOffset);
+    	len -= DataOffset;
+    	/* update Total data received counter */
+    	TotalData +=len;
+
+    	if(TotalReceived == ContentSize) {
+    		/* if last packet need to remove the http boundary tag */
+    		/* parse packet for "\r\n--" starting from end of data */
+    		i = 4;
+    		while(strncmp((char *)(data + p->tot_len - i), http_crnl_2, 4)) {
+    			i ++;
+    		}
+    		len -= i;
+    		TotalData -= i;
+
+    		/* write data in Flash */
+//    		if (len) IAP_HTTP_writedata(ptr, len);
+    		RecPostDataFlag = 0;
+    		printf("%d bytes received.\n", TotalData);
+    		/* Load index page */
+    		hs->file = (char *)_HTML_INDEX_ADDR;
+    		hs->left = _HTML_INDEX_LEN;
+    		pbuf_free(p);
+    		/* Tell TCP that we wish be to informed of data that has been
+    		   successfully sent by a call to the http_sent() function. */
+    		tcp_sent(pcb, http_sent);
+    	} else {
+    		/* not last data packet */
+    		/* write data in flash */
+//    		if(len) IAP_HTTP_writedata(ptr, len);
+    	}
+    	pbuf_free(p);
+      } else if(strncmp((char const *)data, "POST /upgrade/fc.cgi", 20) == 0) {
+    	  printf("fc: %s", data);
+    	  /* Load index page */
+    	  hs->file = (char *)_HTML_INDEX_ADDR;
+    	  hs->left = _HTML_INDEX_LEN;
+    	  pbuf_free(p);
+    	  /* Tell TCP that we wish be to informed of data that has been
+    	     successfully sent by a call to the http_sent() function. */
+    	  tcp_sent(pcb, http_sent);
+      } else {
+    	  /* Bad HTTP request\n */
+    	  close_conn(pcb, hs);
       }
-    }
+	} else {
+		pbuf_free(p);
+		close_conn(pcb, hs);
+	}
   }
   if(err == ERR_OK && p == NULL) {
 	  /* received empty frame */
