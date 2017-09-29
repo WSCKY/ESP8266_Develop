@@ -185,5 +185,5 @@ void user_init(void)
 
 	xTaskCreate(TaskStart, "startTask", 512, NULL, 5, NULL);
 
-    printf("Version Identifier: V0.0.5\n");
+    printf("Version Identifier: V0.0.6\n");
 }
