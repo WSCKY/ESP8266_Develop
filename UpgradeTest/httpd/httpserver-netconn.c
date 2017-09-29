@@ -19,6 +19,7 @@
 #include "freertos/task.h"
 #include "user_config.h"
 #include "lwip/lwip/tcp.h"
+#include "espressif/upgrade.h"
 
 /* Private typedef -----------------------------------------------------------*/
 struct http_state {
@@ -49,6 +50,7 @@ static uint32_t ContentLengthOffset = 0;
 static uint32_t ContentSize = 0;
 static uint32_t TotalReceived = 0;
 static uint32_t TotalData = 0;
+static uint8_t UpgradeComplete = 0;
 
 static const char http_crnl_2[4] =
 /* "\r\n--" */
@@ -159,6 +161,10 @@ static err_t http_sent(void *arg, struct tcp_pcb *pcb, u16_t len)
     send_data(pcb, hs);
   } else {
     close_conn(pcb, hs);
+    if(UpgradeComplete == 1) {
+    	system_upgrade_reboot();
+    	while(1);
+    }
   }
   return ERR_OK;
 }
@@ -272,7 +278,7 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
 //			  printf("dbg1: %s", (char *)data);
 			  pbuf_free(p);
 			  return ERR_OK;
-		  } else {/* case of Mozilla Firefox : we receive data in the POST packet*/
+		  } else {/* case of Mozilla Firefox : we receive data in the POST packet */
 			  TotalReceived = len - (ContentLengthOffset + 4);
 		  }
 		}
@@ -328,6 +334,9 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
     		}
     		TotalData = 0;
     		/* -------- */
+    		system_upgrade_init();
+    		system_upgrade_flag_set(UPGRADE_FLAG_START);
+    		system_upgrade_erase();
 //    		printf("Start Receive data ...\n");
     	} else {
     		/* DataFlag >1 => the packet is data only */
@@ -350,11 +359,13 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
     		TotalData -= i;
 
     		/* write data in Flash */
-//    		if (len) IAP_HTTP_writedata(ptr, len);
+    		if (len) system_upgrade(ptr, len);
 //    		printf("end: %s...", (char *)ptr);
 //    		printf("end char: %c.\n", *(char *)(ptr + len -1));
+    		system_upgrade_flag_set(UPGRADE_FLAG_FINISH);
     		RecPostDataFlag = 0;
-    		printf("%d bytes received.\n", TotalData);
+    		UpgradeComplete = 1; /* Upgrade Complete. */
+    		printf("%d bytes received.\nreboot automatically...\n", TotalData);
     		/* Load index page */
     		hs->file = (char *)_HTML_INDEX_ADDR;
     		hs->left = _HTML_INDEX_LEN;
@@ -365,7 +376,7 @@ static err_t http_recv(void *arg, struct tcp_pcb *pcb,  struct pbuf *p, err_t er
     	} else {
     		/* not last data packet */
     		/* write data in flash */
-//    		if(len) IAP_HTTP_writedata(ptr, len);
+    		if(len) system_upgrade(ptr, len);
 //    		printf("fd: %s", (char *)ptr);
     	}
     	pbuf_free(p);
