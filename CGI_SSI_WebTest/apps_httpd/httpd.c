@@ -89,10 +89,10 @@
  * the 'g_psHTTPHeaders' list.
  */
 #include "lwip/init.h"
-#include "lwip/apps/httpd.h"
+#include "httpd.h"
 #include "lwip/debug.h"
 #include "lwip/stats.h"
-#include "lwip/apps/fs.h"
+#include "fs.h"
 #include "httpd_structs.h"
 #include "lwip/def.h"
 #include "lwip/ip.h"
@@ -2559,11 +2559,13 @@ httpd_init(void)
 #endif
   LWIP_DEBUGF(HTTPD_DEBUG, ("httpd_init\n"));
 
-  pcb = tcp_new_ip_type(IPADDR_TYPE_ANY);
+  /*create new pcb*/
+  pcb = (struct tcp_pcb *)tcp_new();
   LWIP_ASSERT("httpd_init: tcp_new failed", pcb != NULL);
   tcp_setprio(pcb, HTTPD_TCP_PRIO);
   /* set SOF_REUSEADDR here to explicitly bind httpd to multiple interfaces */
-  err = tcp_bind(pcb, IP_ANY_TYPE, HTTPD_SERVER_PORT);
+  /* bind HTTP traffic to pcb */
+  err = tcp_bind(pcb, IP_ADDR_ANY, HTTPD_SERVER_PORT);
   LWIP_ASSERT("httpd_init: tcp_bind failed", err == ERR_OK);
   pcb = tcp_listen(pcb);
   LWIP_ASSERT("httpd_init: tcp_listen failed", pcb != NULL);
