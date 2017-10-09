@@ -166,6 +166,7 @@ void TaskStart(void *p)
 	tftpd_init();
 	/* Httpd Init */
 	httpd_init();
+	Httpd_cgi_ssi_init();
 //	http_server_netconn_init();
 
 	vTaskDelete(NULL);
