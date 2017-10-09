@@ -163,7 +163,7 @@ void TaskStart(void *p)
 	wifi_station_set_hostname("kyChu_ESP8266");
 
 	tftpd_init();
-	http_server_netconn_init();
+//	http_server_netconn_init();
 
 	vTaskDelete(NULL);
 }
