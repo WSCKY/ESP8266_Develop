@@ -141,7 +141,7 @@ DDEFINES +=				\
 # Required for each makefile to inherit from the parent
 #
 
-INCLUDES := $(INCLUDES) -I $(PDIR)include
+INCLUDES := $(INCLUDES) -I $(PDIR)include -I $(PDIR)inc_httpd
 sinclude $(SDK_PATH)/Makefile
 
 .PHONY: FORCE upload loadboot loadparam loadres
