@@ -41,7 +41,7 @@
 #ifndef LWIP_HDR_APPS_HTTPD_OPTS_H
 #define LWIP_HDR_APPS_HTTPD_OPTS_H
 
-#include "lwip/opt.h"
+#include "lwip/lwip/opt.h"
 
 /**
  * @defgroup httpd_opts Options
