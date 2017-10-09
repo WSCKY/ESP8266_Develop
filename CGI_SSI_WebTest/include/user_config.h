@@ -25,7 +25,7 @@
 #ifndef __USER_CONFIG_H__
 #define __USER_CONFIG_H__
 
-#if 1
+#if 0
 #define MY_AP_SSID           "Hey,Loser!"
 #define MY_AP_PASSWD         "LoserLoser"
 #else
