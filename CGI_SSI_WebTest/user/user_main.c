@@ -162,7 +162,10 @@ void TaskStart(void *p)
 	free(stconfig);
 	wifi_station_set_hostname("kyChu_ESP8266");
 
+	/* Tftpd Init */
 	tftpd_init();
+	/* Httpd Init */
+	httpd_init();
 //	http_server_netconn_init();
 
 	vTaskDelete(NULL);
