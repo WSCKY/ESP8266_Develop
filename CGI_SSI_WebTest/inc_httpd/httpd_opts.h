@@ -41,7 +41,7 @@
 #ifndef LWIP_HDR_APPS_HTTPD_OPTS_H
 #define LWIP_HDR_APPS_HTTPD_OPTS_H
 
-#include "lwip/lwip/opt.h"
+#include "lwip/opt.h"
 
 /**
  * @defgroup httpd_opts Options
@@ -51,7 +51,7 @@
 
 /** Set this to 1 to support CGI (old style) */
 #if !defined LWIP_HTTPD_CGI || defined __DOXYGEN__
-#define LWIP_HTTPD_CGI            0
+#define LWIP_HTTPD_CGI            1
 #endif
 
 /** Set this to 1 to support CGI (new style) */
@@ -61,7 +61,7 @@
 
 /** Set this to 1 to support SSI (Server-Side-Includes) */
 #if !defined LWIP_HTTPD_SSI || defined __DOXYGEN__
-#define LWIP_HTTPD_SSI            0
+#define LWIP_HTTPD_SSI            1
 #endif
 
 /** Set this to 1 to implement an SSI tag handler callback that gets a const char*
@@ -278,7 +278,7 @@
  *    Called to free resources allocated by fs_open_custom().
  */
 #if !defined LWIP_HTTPD_CUSTOM_FILES || defined __DOXYGEN__
-#define LWIP_HTTPD_CUSTOM_FILES       0
+#define LWIP_HTTPD_CUSTOM_FILES       1
 #endif
 
 /** Set this to 1 to support fs_read() to dynamically read file data.
@@ -286,7 +286,7 @@
  * and the contents must be ready after fs_open().
  */
 #if !defined LWIP_HTTPD_DYNAMIC_FILE_READ || defined __DOXYGEN__
-#define LWIP_HTTPD_DYNAMIC_FILE_READ  0
+#define LWIP_HTTPD_DYNAMIC_FILE_READ  1
 #endif
 
 /** Set this to 1 to include an application state argument per file
@@ -313,7 +313,7 @@
 /** Set this to 1 to include "fsdata_custom.c" instead of "fsdata.c" for the
  * file system (to prevent changing the file included in CVS) */
 #if !defined HTTPD_USE_CUSTOM_FSDATA || defined __DOXYGEN__
-#define HTTPD_USE_CUSTOM_FSDATA 0
+#define HTTPD_USE_CUSTOM_FSDATA 1
 #endif
 
 /**
