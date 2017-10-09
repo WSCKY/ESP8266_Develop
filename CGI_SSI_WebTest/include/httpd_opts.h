@@ -51,7 +51,7 @@
 
 /** Set this to 1 to support CGI (old style) */
 #if !defined LWIP_HTTPD_CGI || defined __DOXYGEN__
-#define LWIP_HTTPD_CGI            0
+#define LWIP_HTTPD_CGI            1
 #endif
 
 /** Set this to 1 to support CGI (new style) */
@@ -61,7 +61,7 @@
 
 /** Set this to 1 to support SSI (Server-Side-Includes) */
 #if !defined LWIP_HTTPD_SSI || defined __DOXYGEN__
-#define LWIP_HTTPD_SSI            0
+#define LWIP_HTTPD_SSI            1
 #endif
 
 /** Set this to 1 to implement an SSI tag handler callback that gets a const char*
