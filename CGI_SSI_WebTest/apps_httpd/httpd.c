@@ -1947,7 +1947,7 @@ http_parse_request(struct pbuf *inp, struct http_state *hs, struct tcp_pcb *pcb)
   /* received enough data for minimal request? */
   if (data_len >= MIN_REQ_LEN) {
     /* wait for CRLF before parsing anything */
-    crlf = lwip_strnstr(data, CRLF, data_len);
+    crlf = (char *)lwip_strnstr(data, CRLF, data_len);
     if (crlf != NULL) {
 #if LWIP_HTTPD_SUPPORT_POST
       int is_post = 0;
@@ -1979,11 +1979,11 @@ http_parse_request(struct pbuf *inp, struct http_state *hs, struct tcp_pcb *pcb)
       }
       /* if we come here, method is OK, parse URI */
       left_len = (u16_t)(data_len - ((sp1 +1) - data));
-      sp2 = lwip_strnstr(sp1 + 1, " ", left_len);
+      sp2 = (char *)lwip_strnstr(sp1 + 1, " ", left_len);
 #if LWIP_HTTPD_SUPPORT_V09
       if (sp2 == NULL) {
         /* HTTP 0.9: respond with correct protocol version */
-        sp2 = lwip_strnstr(sp1 + 1, CRLF, left_len);
+        sp2 = (char *)lwip_strnstr(sp1 + 1, CRLF, left_len);
         is_09 = 1;
 #if LWIP_HTTPD_SUPPORT_POST
         if (is_post) {
@@ -1996,7 +1996,7 @@ http_parse_request(struct pbuf *inp, struct http_state *hs, struct tcp_pcb *pcb)
       uri_len = (u16_t)(sp2 - (sp1 + 1));
       if ((sp2 != 0) && (sp2 > sp1)) {
         /* wait for CRLFCRLF (indicating end of HTTP headers) before parsing anything */
-        if (lwip_strnstr(data, CRLF CRLF, data_len) != NULL) {
+        if ((char *)lwip_strnstr(data, CRLF CRLF, data_len) != NULL) {
           char *uri = sp1 + 1;
 #if LWIP_HTTPD_SUPPORT_11_KEEPALIVE
           /* This is HTTP/1.0 compatible: for strict 1.1, a connection
@@ -2261,7 +2261,7 @@ http_init_file(struct http_state *hs, struct fs_file *file, int is_09, const cha
     if (is_09 && ((hs->handle->flags & FS_FILE_FLAGS_HEADER_INCLUDED) != 0)) {
       /* HTTP/0.9 responses are sent without HTTP header,
          search for the end of the header. */
-      char *file_start = lwip_strnstr(hs->file, CRLF CRLF, hs->left);
+      char *file_start = (char *)lwip_strnstr(hs->file, CRLF CRLF, hs->left);
       if (file_start != NULL) {
         size_t diff = file_start + 4 - hs->file;
         hs->file += diff;
