@@ -36,7 +36,7 @@ GEN_BINS= eagle.app.v6.bin
 SPECIAL_MKTARGETS=$(APP_MKTARGETS)
 SUBDIRS=    \
 	user   \
-        httpd  \
+        apps_httpd  \
         tftpd  \
         upgrade
 
@@ -62,7 +62,7 @@ endif
 
 COMPONENTS_eagle.app.v6 = \
 	user/libuser.a    \
-	httpd/libhttpd.a  \
+	apps_httpd/libhttpd.a  \
         tftpd/libtftpd.a  \
         upgrade/libupgrade.a
 
