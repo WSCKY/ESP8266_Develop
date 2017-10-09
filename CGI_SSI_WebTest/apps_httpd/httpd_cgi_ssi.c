@@ -5,6 +5,8 @@ const char* TAGCHAR="echo";
 const char** TAGS = &TAGCHAR;
 static char* display = "<br />hi, i'm kychu! - 0<br />";
 
+static uint8_t req_cnt = 0;
+
 u16_t StringHandler(int iIndex, char *pcInsert, int iInsertLen)
 {
 	uint8_t i = 0;
@@ -13,7 +15,9 @@ u16_t StringHandler(int iIndex, char *pcInsert, int iInsertLen)
 		for(i = 0; i < 31; i ++)
 			pcInsert[i] = display[i];
 
-		display[23] ++;
+		pcInsert[23] += req_cnt;
+		req_cnt ++;
+		printf("insert %s.\n", pcInsert);
 		return 31;
 	}
 }
