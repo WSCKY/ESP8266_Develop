@@ -33,7 +33,7 @@
 #define MY_AP_PASSWD         "royal_pray@pray"
 #endif
 
-#define USR_AP_SSID          "TestForOTA"
+#define USR_AP_SSID          "kyChu_CGI_SSI"
 #define USR_AP_PASSWD        "12345678"
 
 #define MAX_CONN             4
