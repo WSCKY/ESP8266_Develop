@@ -4,7 +4,7 @@
 
 #define FS_ROOT NULL
 
-#define _HTML_INDEX_LEN          1984
+#define _HTML_INDEX_LEN          1976
 #define _HTML_INDEX_ADDR         0x81000
 #define _HTML_404_LEN            785
 #define _HTML_404_ADDR           0x82000
@@ -41,7 +41,7 @@ int fs_open_custom(struct fs_file *file, const char *name) {
 //			printf("find exp file: %s.\n", custom_files[i].name);
 			file->index = 0;
 			file->len = custom_files[i].len;
-			file->flags = 1;
+			file->flags = 0;
 			file->pextension = NULL;
 			custom_file_addr = custom_files[i].addr;
 			return 1;
