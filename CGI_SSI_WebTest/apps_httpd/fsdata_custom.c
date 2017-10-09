@@ -24,7 +24,7 @@ struct file_opt {
 static uint32_t custom_file_addr = _HTML_INDEX_ADDR;
 
 const struct file_opt custom_files[] = {
-	{"/index.html", _HTML_INDEX_LEN, _HTML_INDEX_ADDR},
+	{"/index.shtml", _HTML_INDEX_LEN, _HTML_INDEX_ADDR},
 	{"/img/header.png", _HTML_PNG_LEN, _HTML_PNG_ADDR},
 	{"/img/logo.ico", _HTML_LOGO_LEN, _HTML_LOGO_ADDR},
 	{"/kyChu/login.cgi", _HTML_UPLOAD_LEN, _HTML_UPLOAD_ADDR},
