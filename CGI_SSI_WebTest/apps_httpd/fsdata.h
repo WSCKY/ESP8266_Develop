@@ -32,8 +32,8 @@
 #ifndef LWIP_FSDATA_H
 #define LWIP_FSDATA_H
 
-#include "lwip/apps/httpd_opts.h"
-#include "lwip/apps/fs.h"
+#include "httpd_opts.h"
+#include "fs.h"
 
 struct fsdata_file {
   const struct fsdata_file *next;
