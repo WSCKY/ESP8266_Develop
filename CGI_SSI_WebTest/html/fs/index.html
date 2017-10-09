@@ -1,0 +1,48 @@
+<html>
+<head>
+ <title>WSCKY_WebServer</title>
+ <link rel="icon" href="/img/logo.ico" type="image/x-icon" />
+ <style type="text/css">
+  .main{padding-bottom:20px;}
+  .footer{position:absolute;text-align:center;font-size:12px;font-family:"courier new";bottom:0px;width:100%;}
+ </style>
+</head>
+<body bgcolor="white" >
+    <table width="100%">
+      <tr valign="top"><td width="150" height="150">
+	  <a href="https://github.com/WSCKY/"><img src="/img/header.png"
+	  border="0" alt="WSCKY logo" title="WSCKY"></a>
+	</td><td width="800">
+	  <h1 align="center">kyChu WebServer</h1>
+	  <p>
+	    The web page you are watching was served by a simple web server running on ESP8266 wifi module.<br />
+        You can get the Source Code from <a href="https://github.com/WSCKY/ESP8266_Develop/">my github</a>.
+	  </p>
+	 <form action="/kyChu/login.cgi" method="post">
+	  <fieldset>
+	   <legend>Login:</legend>
+	   username: <input type="text" name="user" align="right" /><br />
+	   password: <input type="password" name="password" align="right" /><br /><br />
+	   <input type="submit" value="Submit">
+	  </fieldset>
+	 </form>
+	 <form action="MAILTO:kychu@qq.com" method="post" enctype="text/plain">
+	  <fieldset>
+	   <legend>Eamil:</legend>
+	   name: <input type="text" name="name" size="20" /><br />
+	   email: <input type="text" name="mail" size="20" /><br />
+	   comment: <input type="text" name="comment" size="20" /><br /><br />
+	   <input type="submit" value="send" /> <input type="reset" value="reset" />
+	  </fieldset>
+	 </form>
+	 <form action="/kyChu/print.cgi" method="post">
+	  <fieldset>
+	   <legend>Print:</legend>
+	   comment: <input type="text" name="comment" size="30" />
+	   <input type="submit" name="submit" value="submit" />
+	  </fieldset>
+	 </form>
+    </table>
+	<div class="footer">Copyright &copy 1993 - 2017. All Rights Reserved By kyChu.</div>
+</body>
+</html>

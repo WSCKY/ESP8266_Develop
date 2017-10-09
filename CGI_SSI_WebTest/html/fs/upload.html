@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv="content-type" content="text/html; charset=windows-1250" />
+ <title>Firmware Upgrade</title>
+ <link rel="shortcut icon" href="/img/header.ico" type="image/x-icon" />
+ <style type="text/css">
+  .main{padding-bottom:20px;}
+  .footer{position:absolute;text-align:center;font-size:12px;font-family:"courier new";bottom:0px;width:100%;}
+ </style>
+</head>
+<body>
+ <table width="100%">
+ <tr valign="top">
+  <td width="150" height="150">
+   <a href="https://github.com/WSCKY/"><img src="/img/header.png" border="0" alt="WSCKY logo" title="WSCKY"></a>
+  </td>
+  <td width="800">
+  <table><tr>
+  <p><font size="3" face="courier new">Please specify the latest firmware to upload:</font></p></tr><tr>
+  <td><table cellspacing="5">
+  <form action="/upgrade/wifi.cgi" enctype="multipart/form-data" method="post">
+   <tr>Wifi Module:</tr>
+   <tr>
+    <td> &nbsp &nbsp <input name="datafile" type="file" size="40" /></td><td> &nbsp &nbsp <input type="submit" value="Upload" /></td>
+   </tr>
+   </table>
+  </form></td></tr><tr>
+  <td><table cellspacing="5">
+  <form action="/upgrade/fc.cgi" enctype="multipart/form-data" method="post">
+   <tr>Flight Control:</tr>
+   <tr>
+    <td> &nbsp &nbsp <input name="datafile" type="file" size="40" /></td><td> &nbsp &nbsp <input type="submit" value="Upload" /></td>
+   </tr>
+   </table>
+  </form></td></tr>
+  </table>
+  </td>
+ </tr>
+ </table>
+ <div class="footer">Copyright &copy 1993 - 2017. All Rights Reserved By kyChu.</div>
+</body>
+</html>
