@@ -49,11 +49,15 @@ const char *Print_Handler(int iIndex, int iNumParams, char *pcParam[], char *pcV
 	return "/index.shtml";
 }
 
+static char req_uri[20];
+static const char* default_uri = "/index.shtml";
 err_t httpd_post_begin(void *connection, const char *uri, const char *http_request,
                        u16_t http_request_len, int content_len, char *response_uri,
                        u16_t response_uri_len, u8_t *post_auto_wnd) {
 //	printf("a POST request has been received.\n");
-//	printf("uri is %s.\n", uri);
+//	printf("uri is %s, len = %d.\n", uri, strlen(uri));
+	memcpy(req_uri, uri, strlen(uri));
+	req_uri[strlen(uri)] = 0;
 	return ERR_OK;
 }
 
@@ -62,24 +66,36 @@ err_t httpd_post_receive_data(void *connection, struct pbuf *p) {
 //	printf("each pbuf of data that has been received for a POST.\n");
 //	printf("tot_len = %d, len = %d.\n", p->tot_len, p->len);
 //	printf("payload is %s.\n", p->payload);
-	int i = 0, j = 0;
-	while(i < p->len && ((char *)p->payload)[i] != '=') i ++;
-	do {
-		i ++;
-		cache[j ++] = ((char *)p->payload)[i];
-	} while(i < p->len && ((char *)p->payload)[i] != '&');
-	cache[j - 1] = 0;
-	printf("%s\n", cache);
+	if(!strcmp(req_uri, "/kyChu/print.cgi")) {
+		int i = 0, j = 0;
+		while(i < p->len && ((char *)p->payload)[i] != '=') i ++;
+		do {
+			i ++;
+			cache[j ++] = ((char *)p->payload)[i];
+		} while(i < p->len && ((char *)p->payload)[i] != '&');
+		cache[j - 1] = 0;
+		printf("%s\n", cache);
+		memcpy(req_uri, default_uri, strlen(default_uri));
+		req_uri[strlen(default_uri)] = 0;
+	} else if(!strcmp(req_uri, "/upgrade/wifi.cgi")) {
+		memcpy(req_uri, default_uri, strlen(default_uri));
+		req_uri[strlen(default_uri)] = 0;
+	} else if(!strcmp(req_uri, "/upgrade/fc.cgi")) {
+		memcpy(req_uri, default_uri, strlen(default_uri));
+		req_uri[strlen(default_uri)] = 0;
+	}
 	return ERR_OK;
 }
 
-static const char* rsp_uri = "/index.shtml";
 void httpd_post_finished(void *connection, char *response_uri, u16_t response_uri_len) {
 	uint32_t i = 0;
 //	printf("all data is received or the connection is closed.\n");
-	for(; i < 12; i ++) {
-		response_uri[i] = rsp_uri[i];
-	}
+	memcpy(response_uri, req_uri, strlen(req_uri));
+	response_uri[strlen(req_uri)] = 0;
+	printf("rsp uri: %s.\n", response_uri);
+//	for(; i < 12; i ++) {
+//		response_uri[i] = rsp_uri[i];
+//	}
 }
 
 void Httpd_cgi_ssi_init(void)
