@@ -99,7 +99,7 @@
 #endif
 
 #if !defined LWIP_HTTPD_POST_MANUAL_WND || defined __DOXYGEN__
-#define LWIP_HTTPD_POST_MANUAL_WND  0
+#define LWIP_HTTPD_POST_MANUAL_WND  1
 #endif
 
 /** This string is passed in the HTTP header as "Server: " */
