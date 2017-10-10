@@ -55,7 +55,7 @@ err_t httpd_post_begin(void *connection, const char *uri, const char *http_reque
                        u16_t http_request_len, int content_len, char *response_uri,
                        u16_t response_uri_len, u8_t *post_auto_wnd) {
 //	printf("a POST request has been received.\n");
-	printf("content_len: %d.\n", content_len);
+//	printf("content_len: %d.\n", content_len);
 //	printf("uri is %s, len = %d.\n", uri, strlen(uri));
 	memcpy(req_uri, uri, strlen(uri));
 	req_uri[strlen(uri)] = 0;
@@ -66,8 +66,8 @@ char cache[20];
 err_t httpd_post_receive_data(void *connection, struct pbuf *p) {
 //	printf("each pbuf of data that has been received for a POST.\n");
 //	printf("tot_len = %d, len = %d.\n", p->tot_len, p->len);
-	((char *)p->payload)[p->len] = 0;
-	printf("payload is %s.\n", p->payload);
+//	((char *)p->payload)[p->len] = 0;
+//	printf("payload is %s.\n", p->payload);
 	if(!strcmp(req_uri, "/kyChu/print.cgi")) {
 		int i = 0, j = 0;
 		while(i < p->len && ((char *)p->payload)[i] != '=') i ++;
@@ -94,10 +94,7 @@ void httpd_post_finished(void *connection, char *response_uri, u16_t response_ur
 //	printf("all data is received or the connection is closed.\n");
 	memcpy(response_uri, req_uri, strlen(req_uri));
 	response_uri[strlen(req_uri)] = 0;
-	printf("rsp uri: %s.\n", response_uri);
-//	for(; i < 12; i ++) {
-//		response_uri[i] = rsp_uri[i];
-//	}
+//	printf("rsp uri: %s.\n", response_uri);
 }
 
 void Httpd_cgi_ssi_init(void)
