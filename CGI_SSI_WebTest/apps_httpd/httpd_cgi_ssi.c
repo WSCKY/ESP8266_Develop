@@ -78,6 +78,7 @@ err_t httpd_post_receive_data(void *connection, struct pbuf *p) {
 		memcpy(req_uri, default_uri, strlen(default_uri));
 		req_uri[strlen(default_uri)] = 0;
 	} else if(!strcmp(req_uri, "/upgrade/wifi.cgi")) {
+		printf("upload %s.\n", p->payload);
 		memcpy(req_uri, default_uri, strlen(default_uri));
 		req_uri[strlen(default_uri)] = 0;
 	} else if(!strcmp(req_uri, "/upgrade/fc.cgi")) {
