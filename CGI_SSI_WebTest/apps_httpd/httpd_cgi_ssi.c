@@ -49,6 +49,8 @@ const char *Print_Handler(int iIndex, int iNumParams, char *pcParam[], char *pcV
 	return "/index.shtml";
 }
 
+static uint8_t UpgradeCmd = 0;
+
 static char req_uri[20];
 static const char* default_uri = "/index.shtml";
 err_t httpd_post_begin(void *connection, const char *uri, const char *http_request,
@@ -57,7 +59,10 @@ err_t httpd_post_begin(void *connection, const char *uri, const char *http_reque
 //	printf("a POST request has been received.\n");
 //	printf("content_len: %d.\n", content_len);
 //	printf("uri is %s, len = %d.\n", uri, strlen(uri));
-	memcpy(req_uri, uri, strlen(uri));
+	if(!strcmp(uri, "/upgrade/wifi.cgi")) {
+		UpgradeCmd = 1;//upgrade start flag.
+	}
+	memcpy(req_uri, uri, strlen(uri));//save the origin request uri.
 	req_uri[strlen(uri)] = 0;
 	return ERR_OK;
 }
@@ -79,12 +84,13 @@ err_t httpd_post_receive_data(void *connection, struct pbuf *p) {
 		printf("%s\n", cache);
 		memcpy(req_uri, default_uri, strlen(default_uri));
 		req_uri[strlen(default_uri)] = 0;
-	} else if(!strcmp(req_uri, "/upgrade/wifi.cgi")) {
-		memcpy(req_uri, default_uri, strlen(default_uri));
+	} else if((!strcmp(req_uri, "/upgrade/wifi.cgi")) || (!strcmp(req_uri, "/upgrade/fc.cgi"))) {
+		memcpy(req_uri, default_uri, strlen(default_uri));//jump to default page(index page).
 		req_uri[strlen(default_uri)] = 0;
-	} else if(!strcmp(req_uri, "/upgrade/fc.cgi")) {
-		memcpy(req_uri, default_uri, strlen(default_uri));
-		req_uri[strlen(default_uri)] = 0;
+	}
+	if(UpgradeCmd == 1) {
+		/* !!!need another process!!! */
+		printf("!program wifi %s", p->payload);//programming...
 	}
 	return ERR_OK;
 }
@@ -92,7 +98,8 @@ err_t httpd_post_receive_data(void *connection, struct pbuf *p) {
 void httpd_post_finished(void *connection, char *response_uri, u16_t response_uri_len) {
 	uint32_t i = 0;
 //	printf("all data is received or the connection is closed.\n");
-	memcpy(response_uri, req_uri, strlen(req_uri));
+	if(UpgradeCmd) UpgradeCmd = 0;
+	memcpy(response_uri, req_uri, strlen(req_uri));/* jump to the specific page. */
 	response_uri[strlen(req_uri)] = 0;
 //	printf("rsp uri: %s.\n", response_uri);
 }
