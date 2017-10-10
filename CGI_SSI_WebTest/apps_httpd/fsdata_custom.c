@@ -4,7 +4,7 @@
 
 #define FS_ROOT NULL
 
-#define _HTML_INDEX_LEN          1976
+#define _HTML_INDEX_LEN          1992
 #define _HTML_INDEX_ADDR         0x81000
 #define _HTML_404_LEN            785
 #define _HTML_404_ADDR           0x82000
