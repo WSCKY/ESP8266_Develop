@@ -42,7 +42,7 @@ const char *Print_Handler(int iIndex, int iNumParams, char *pcParam[], char *pcV
 	int i = 0;
 	if(iIndex == 0) {
 		printf("CGI > got param num: %d.\n", iNumParams);
-		for(i == 0; i < iNumParams; i ++) {
+		for(i = 0; i < iNumParams; i ++) {
 			printf("param is: %s, Vaule is %s.\n", pcParam[i], pcValue[i]);
 		}
 	}
