@@ -111,7 +111,7 @@ err_t httpd_post_receive_data(void *connection, struct pbuf *p) {
 	}
 	if(UpgradeCmd == 1) {
 		/* !!!need another process!!! */
-		printf("!program wifi %s", p->payload);//programming...
+//		printf("!program wifi %s", p->payload);//programming...
 	}
 	return ERR_OK;
 }
