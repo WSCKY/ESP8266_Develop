@@ -215,8 +215,8 @@ uart0_rx_intr_handler(void *para)
 *******************************************************************************/
 void user_init(void)
 {
-	/* station + softAP mode */
-	wifi_set_opmode(STATIONAP_MODE);
+	/* softAP mode */
+	wifi_set_opmode(SOFTAP_MODE);
 
     struct softap_config *apconfig = (struct softap_config *)zalloc(sizeof(struct softap_config)); //initialization.
     wifi_softap_get_config(apconfig);
@@ -227,12 +227,6 @@ void user_init(void)
     apconfig->max_connection = 4;
     wifi_softap_set_config(apconfig);
     free(apconfig);
-
-	struct station_config *stconfig = (struct station_config *)zalloc(sizeof(struct station_config));
-	sprintf(stconfig->ssid, MY_AP_SSID);
-	sprintf(stconfig->password, MY_AP_PASSWD);
-	wifi_station_set_config(stconfig);
-	free(stconfig);
 
 	uart_init_new();
 	UART_intr_handler_register(uart0_rx_intr_handler, NULL);
