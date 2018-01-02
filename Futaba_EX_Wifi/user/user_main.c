@@ -27,6 +27,9 @@
 #include "lwip/lwip/sockets.h"
 #include "freertos/semphr.h"
 #include "uart.h"
+#include "futaba.h"
+#include "rc_raw.h"
+#include "crc8.h"
 
 /******************************************************************************
  * FunctionName : user_rf_cal_sector_set
@@ -94,21 +97,21 @@ void udp_process(void *p)
 	do {
 		sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
 		if(sock_fd == -1) {
-			printf("ESP8266 UDP task > failed to create socket!\n");
+			printf("kyChu UDP task > failed to create socket!\n");
 			vTaskDelay(1000/portTICK_RATE_MS);
 		}
 	} while(sock_fd == -1);
-	printf("ESP8266 UDP task > socket OK!\n");
+	printf("kyChu UDP task > socket OK!\n");
 
 	int ret = 0;
 	do {
 		ret = bind(sock_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
 		if(ret != 0) {
-			printf("ESP8266 UDP task > captdns_task failed to bind socket!\n");
+			printf("kyChu UDP task > captdns_task failed to bind socket!\n");
 			vTaskDelay(1000/portTICK_RATE_MS);
 		}
 	} while(ret != 0);
-	printf("ESP8266 UDP task > bind OK!\n");
+	printf("kyChu UDP task > bind OK!\n");
 
 	uint8_t *udp_msg = (uint8_t *)zalloc(UDP_DATA_LEN);
 	struct sockaddr_in from;
@@ -127,7 +130,7 @@ void udp_process(void *p)
         		memcpy(&sock_to, &from, sizeof(struct sockaddr_in));
         		sock_to_initialized = 1;
         	}
-//        	printf("ESP8266 UDP task > recv %d Bytes from %s, Port %d\n", ret, inet_ntoa(from.sin_addr), ntohs(from.sin_port));
+//        	printf("kyChu UDP task > recv %d Bytes from %s, Port %d\n", ret, inet_ntoa(from.sin_addr), ntohs(from.sin_port));
         }
 	}
 	if(udp_msg) {
@@ -137,11 +140,16 @@ void udp_process(void *p)
 	close(sock_fd);
 }
 
+#define UART_RX_BUFF_LEN       21
 uint8 fifo_len = 0;
-LOCAL uint8 fifo_tmp[20] = {0};
+LOCAL uint8 fifo_tmp[UART_RX_BUFF_LEN] = {0};
+
+LOCAL RC_CHANNLE_t *pRC = {0};
+RawWifiRcDataDef RC_Send = {0x55, 0xAA, 0x12, 0xE1};
 
 xSemaphoreHandle xSemaphore;
 void udp_senddata(void *p) {
+	pRC = GetRC_ChannelData();
 	vSemaphoreCreateBinary( xSemaphore );
 	if( xSemaphore != NULL ) {
 		// The semaphore was created successfully.
@@ -149,8 +157,14 @@ void udp_senddata(void *p) {
 	}
 	while(1) {
 		if( xSemaphoreTake( xSemaphore, portMAX_DELAY ) == pdTRUE ) {
-			if(sock_fd != -1 && sock_to_initialized == 1) {
-				sendto(sock_fd, fifo_tmp, fifo_len, 0, (struct sockaddr *)&sock_to, sizeof(struct sockaddr_in));
+			RC_ProcHandler(fifo_tmp, fifo_len);
+			if(GetRCUpdateFlag()) {
+				RC_ParseData();
+				memcpy(RC_Send.PackData.Channel, pRC->Channel, RC_CHANNEL_NUMBER << 1);
+				RC_Send.PackData.crc = Get_CRC8_Check_Sum(((uint8_t *)&(RC_Send.RawData[2])), PACKET_CRC8_LENGTH, CRC8_INIT);
+				if(sock_fd != -1 && sock_to_initialized == 1) {
+					sendto(sock_fd, RC_Send.RawData, PACKET_TOTAL_LENGTH, 0, (struct sockaddr *)&sock_to, sizeof(struct sockaddr_in));
+				}
 			}
 		}
 	}
