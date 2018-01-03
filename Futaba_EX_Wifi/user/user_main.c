@@ -59,12 +59,6 @@ uint32 user_rf_cal_sector_set(void)
 
         case FLASH_SIZE_16M_MAP_512_512:
         case FLASH_SIZE_16M_MAP_1024_1024:
-            rf_cal_sec = 512 - 5;
-            break;
-
-        case FLASH_SIZE_32M_MAP_512_512:
-        case FLASH_SIZE_32M_MAP_1024_1024:
-            rf_cal_sec = 1024 - 5;
             break;
         case FLASH_SIZE_64M_MAP_1024_1024:
             rf_cal_sec = 2048 - 5;
@@ -140,12 +134,12 @@ void udp_process(void *p)
 	close(sock_fd);
 }
 
-#define UART_RX_BUFF_LEN       21
+#define UART_RX_BUFF_LEN       PACKET_TOTAL_LENGTH
 uint8 fifo_len = 0;
 LOCAL uint8 fifo_tmp[UART_RX_BUFF_LEN] = {0};
 
 LOCAL RC_CHANNLE_t *pRC = {0};
-RawWifiRcDataDef RC_Send = {0x55, 0xAA, 0x12, 0xE1};
+RawWifiRcDataDef RC_Send = {0x55, 0xAA, PACKET_DATA_LENGTH, 0xE1};
 
 xSemaphoreHandle xSemaphore;
 void udp_senddata(void *p) {

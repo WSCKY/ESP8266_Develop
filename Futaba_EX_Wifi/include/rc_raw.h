@@ -3,11 +3,11 @@
 
 #include "esp_common.h"
 
-#define RC_CHANNEL_NUMBER      8
+#define RC_CHANNEL_NUMBER      12
 
-#define PACKET_TOTAL_LENGTH    21
-#define PACKET_DATA_LENGTH     18
-#define PACKET_CRC8_LENGTH     18
+#define PACKET_TOTAL_LENGTH    ((RC_CHANNEL_NUMBER << 1) + 5)
+#define PACKET_DATA_LENGTH     (PACKET_TOTAL_LENGTH - 3)
+#define PACKET_CRC8_LENGTH     (PACKET_TOTAL_LENGTH - 3)
 
 typedef struct {
 	uint8_t stx1;
