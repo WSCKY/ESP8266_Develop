@@ -1,0 +1,6 @@
+Mylinks M0E100D1 wifi Module flash configuration:
+spi speed: 2, 40 MHz (Maybe faster???)
+spi mode:  3, DOUT
+spi size:  3, 2048KB
+spi map:   3, 512KB + 512KB
+
