@@ -93,11 +93,13 @@ echo "enter (0/1/2/3, default 3):"
 read input
 
 if [ -z "$input" ]; then
-    spi_speed=40
+    spi_speed=80
 elif [ $input == 0 ]; then
     spi_speed=20
 elif [ $input == 1 ]; then
     spi_speed=26.7
+elif [ $input == 2 ]; then
+    spi_speed=40
 elif [ $input == 3 ]; then
     spi_speed=80
 else
@@ -112,6 +114,8 @@ echo "enter (0/1/2/3, default 2):"
 read input
 
 if [ -z "$input" ]; then
+    spi_mode=DIO
+elif [ $input == 0 ]; then
     spi_mode=QIO
 elif [ $input == 1 ]; then
     spi_mode=QOUT
@@ -140,6 +144,10 @@ echo "enter (0/2/3/4/5/6/7/8/9, default 6):"
 read input
 
 if [ -z "$input" ]; then
+    spi_size_map=6
+    echo "spi size: 4096KB"
+    echo "spi ota map:  1024KB + 1024KB"
+elif [ $input == 0 ]; then
     spi_size_map=0
     echo "spi size: 512KB"
     echo "spi ota map:  256KB + 256KB"
