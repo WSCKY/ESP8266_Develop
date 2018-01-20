@@ -271,6 +271,7 @@ uart0_rx_intr_handler(void *para)
 *******************************************************************************/
 void user_init(void)
 {
+	system_update_cpu_freq(SYS_CPU_160MHZ);
 	/* station + softAP mode */
 	wifi_set_opmode(STATIONAP_MODE);
 
