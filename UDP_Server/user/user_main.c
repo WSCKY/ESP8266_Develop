@@ -26,10 +26,6 @@
 #include "user_config.h"
 #include "lwip/lwip/sockets.h"
 #include "freertos/semphr.h"
-#include "uart.h"
-#include "futaba.h"
-#include "rc_raw.h"
-#include "crc8.h"
 
 /******************************************************************************
  * FunctionName : user_rf_cal_sector_set
