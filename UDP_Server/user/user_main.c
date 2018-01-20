@@ -136,90 +136,20 @@ void udp_process(void *p)
 	close(sock_fd);
 }
 
-//#define UART_RX_BUFF_LEN       PACKET_TOTAL_LENGTH
-//uint8 fifo_len = 0;
-//LOCAL uint8 fifo_tmp[UART_RX_BUFF_LEN] = {0};
-
-//LOCAL RC_CHANNLE_t *pRC = {0};
-//RawWifiRcDataDef RC_Send = {0x55, 0xAA, PACKET_DATA_LENGTH, 0xE1};
-
 xSemaphoreHandle xSemaphore;
 void udp_senddata(void *p) {
-//	pRC = GetRC_ChannelData();
 	vSemaphoreCreateBinary( xSemaphore );
 	if( xSemaphore != NULL ) {
 		// The semaphore was created successfully.
 		// The semaphore can now be used.
 	}
 	while(1) {
-//		if( xSemaphoreTake( xSemaphore, portMAX_DELAY ) == pdTRUE ) {
-//			RC_ProcHandler(fifo_tmp, fifo_len);
-//			if(GetRCUpdateFlag()) {
-//				RC_ParseData();
-//				memcpy(RC_Send.PackData.Channel, pRC->Channel, RC_CHANNEL_NUMBER << 1);
-//				RC_Send.PackData.crc = Get_CRC8_Check_Sum(((uint8_t *)&(RC_Send.RawData[2])), PACKET_CRC8_LENGTH, CRC8_INIT);
-//				if(sock_fd != -1 && sock_to_initialized == 1) {
-//					sendto(sock_fd, RC_Send.RawData, PACKET_TOTAL_LENGTH, 0, (struct sockaddr *)&sock_to, sizeof(struct sockaddr_in));
-//				}
-//			}
-//		}
 		vTaskDelay(1000/portTICK_RATE_MS);
 		if(sock_fd != -1 && sock_to_initialized == 1) {
 			sendto(sock_fd, "Hello kyChu!\n", 13, 0, (struct sockaddr *)&sock_to, sizeof(struct sockaddr_in));
 		}
 	}
 }
-
-//static signed portBASE_TYPE xHigherPriorityTaskWoken = pdTRUE;
-//LOCAL void
-//uart0_rx_intr_handler(void *para)
-//{
-//    /* uart0 and uart1 intr combine togther, when interrupt occur, see reg 0x3ff20020, bit2, bit0 represents
-//    * uart1 and uart0 respectively
-//    */
-//    uint8 RcvChar;
-//    uint8 uart_no = UART0;//UartDev.buff_uart_no;
-//    uint8 buf_idx = 0;
-//
-//    uint32 uart_intr_status = READ_PERI_REG(UART_INT_ST(uart_no)) ;
-//
-//    while (uart_intr_status != 0x0) {
-//        if (UART_FRM_ERR_INT_ST == (uart_intr_status & UART_FRM_ERR_INT_ST)) {
-//            WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_FRM_ERR_INT_CLR);
-//        } else if (UART_RXFIFO_FULL_INT_ST == (uart_intr_status & UART_RXFIFO_FULL_INT_ST)) {
-//            fifo_len = (READ_PERI_REG(UART_STATUS(uart_no)) >> UART_RXFIFO_CNT_S)&UART_RXFIFO_CNT;
-//            for(buf_idx = 0; buf_idx < fifo_len; buf_idx ++) {
-//            	fifo_tmp[buf_idx] = READ_PERI_REG(UART_FIFO(uart_no)) & 0xFF;
-//            }
-//            if(sock_fd != -1 && sock_to_initialized == 1) {
-//            	xSemaphoreGiveFromISR( xSemaphore, &xHigherPriorityTaskWoken );
-////            	printf("fifo_len = %d, str: %s \n", fifo_len, fifo_tmp);
-////            	printf("send %d bytes to %s, %d\n", fifo_len, inet_ntoa(sock_to.sin_addr), ntohs(sock_to.sin_port));
-//            }
-//
-//            WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_RXFIFO_FULL_INT_CLR);
-//        } else if (UART_RXFIFO_TOUT_INT_ST == (uart_intr_status & UART_RXFIFO_TOUT_INT_ST)) {
-//            fifo_len = (READ_PERI_REG(UART_STATUS(uart_no)) >> UART_RXFIFO_CNT_S)&UART_RXFIFO_CNT;
-//            for(buf_idx = 0; buf_idx < fifo_len; buf_idx ++) {
-//            	fifo_tmp[buf_idx] = READ_PERI_REG(UART_FIFO(uart_no)) & 0xFF;
-//            }
-//            if(sock_fd != -1 && sock_to_initialized == 1) {
-//            	xSemaphoreGiveFromISR( xSemaphore, &xHigherPriorityTaskWoken );
-////            	printf("fifo_len = %d, str: %s \n", fifo_len, fifo_tmp);
-////            	printf("send %d bytes to %s, %d\n", fifo_len, inet_ntoa(sock_to.sin_addr), ntohs(sock_to.sin_port));
-//            }
-//
-//            WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_RXFIFO_TOUT_INT_CLR);
-//        } else if (UART_TXFIFO_EMPTY_INT_ST == (uart_intr_status & UART_TXFIFO_EMPTY_INT_ST)) {
-//            WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_TXFIFO_EMPTY_INT_CLR);
-//            CLEAR_PERI_REG_MASK(UART_INT_ENA(uart_no), UART_TXFIFO_EMPTY_INT_ENA);
-//        } else {
-//            //skip
-//        }
-//
-//        uart_intr_status = READ_PERI_REG(UART_INT_ST(uart_no)) ;
-//    }
-//}
 
 /******************************************************************************
  * FunctionName : user_init
@@ -243,9 +173,6 @@ void user_init(void)
     wifi_softap_set_config(apconfig);
     free(apconfig);
 
-//	uart_init_new();
-//	UART_intr_handler_register(uart0_rx_intr_handler, NULL);
-//	ETS_UART_INTR_ENABLE();
     xTaskCreate(udp_process, "udp_process", 512, NULL, 2, NULL);
     xTaskCreate(udp_senddata, "udp_send", 512, NULL, 1, NULL);
 }
