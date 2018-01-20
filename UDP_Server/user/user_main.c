@@ -229,6 +229,7 @@ void udp_senddata(void *p) {
 *******************************************************************************/
 void user_init(void)
 {
+	system_update_cpu_freq(SYS_CPU_160MHZ);
 	/* softAP mode */
 	wifi_set_opmode(SOFTAP_MODE);
 
